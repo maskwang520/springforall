@@ -60,8 +60,6 @@ public class HelloController {
         rpcClient.invoke(interfaceName, method, parameterTypesString, parameter, deferredResult);
     }
 
-
-
     public void consumer(String interfaceName, String method, String parameterTypesString, String parameter, DeferredResult<ResponseEntity> deferredResult) throws Exception {
 
         if (null == endpoints) {

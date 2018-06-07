@@ -47,19 +47,11 @@ public class RpcClient {
         request.setTwoWay(true);
         request.setData(invocation);
 
-        logger.info("requestId=" + request.getId());
+//        logger.info("requestId=" + request.getId());
 
         RpcFuture future = new RpcFuture((res)-> HttpUtil.Ok(deferredResult, res));
         RpcRequestHolder.put(String.valueOf(request.getId()),future);
 
         channel.writeAndFlush(request);
-
-//        Object result = null;
-//        try {
-//            result = future.get();
-//        }catch (Exception e){
-//            e.printStackTrace();
-//        }
-//        return result;
     }
 }
