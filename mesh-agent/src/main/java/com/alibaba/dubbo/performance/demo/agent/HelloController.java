@@ -45,25 +45,24 @@ public class HelloController {
                                                          @RequestParam("parameterTypesString") String parameterTypesString,
                                                          @RequestParam("parameter") String parameter, HttpServletResponse response) throws Exception {
         String type = System.getProperty("type");   // 获取type参数
-        DeferredResult<ResponseEntity> deferedResult = new DeferredResult<>();
+        DeferredResult<ResponseEntity> deferredResult = new DeferredResult<>();
         if ("consumer".equals(type)) {
-            consumer(interfaceName, method, parameterTypesString, parameter, deferedResult);
+            consumer(interfaceName, method, parameterTypesString, parameter, deferredResult);
         } else if ("provider".equals(type)) {
-            provider(interfaceName, method, parameterTypesString, parameter, deferedResult);
+            provider(interfaceName, method, parameterTypesString, parameter, deferredResult);
         } else {
-            HttpUtil.Ok(deferedResult,"Environment variable type is needed to set to provider or consumer.");
+            HttpUtil.Ok(deferredResult,"Environment variable type is needed to set to provider or consumer.");
         }
-        return deferedResult;
+        return deferredResult;
     }
 
-    public void provider(String interfaceName, String method, String parameterTypesString, String parameter, DeferredResult<ResponseEntity> deferedResult) throws Exception {
-        Object result = rpcClient.invoke(interfaceName, method, parameterTypesString, parameter);
-        HttpUtil.Ok(deferedResult, result);
+    public void provider(String interfaceName, String method, String parameterTypesString, String parameter, DeferredResult<ResponseEntity> deferredResult) throws Exception {
+        rpcClient.invoke(interfaceName, method, parameterTypesString, parameter, deferredResult);
     }
 
 
 
-    public void consumer(String interfaceName, String method, String parameterTypesString, String parameter, DeferredResult<ResponseEntity> deferedResult) throws Exception {
+    public void consumer(String interfaceName, String method, String parameterTypesString, String parameter, DeferredResult<ResponseEntity> deferredResult) throws Exception {
 
         if (null == endpoints) {
             synchronized (lock) {
@@ -88,7 +87,7 @@ public class HelloController {
         ListenableFuture<org.asynchttpclient.Response> responseFuture = asyncHttpClient.executeRequest(r, new AsyncCompletionHandler<Response>() {
             @Override
             public Response onCompleted(Response response) throws Exception {
-                HttpUtil.Ok(deferedResult, response.getResponseBody().trim());
+                HttpUtil.Ok(deferredResult, response.getResponseBody().trim());
                 return response;
             }
         });

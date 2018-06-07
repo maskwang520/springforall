@@ -1,11 +1,21 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo.model;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.context.request.async.DeferredResult;
+
 import java.util.concurrent.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class RpcFuture implements Future<Object> {
     private CountDownLatch latch = new CountDownLatch(1);
 
     private RpcResponse response;
+    private Consumer<String> sender;
+
+    public RpcFuture(Consumer<String> sender) {
+        this.sender = sender;
+    }
 
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
@@ -42,6 +52,6 @@ public class RpcFuture implements Future<Object> {
 
     public void done(RpcResponse response){
         this.response = response;
-        latch.countDown();
+        sender.accept(new String(response.getBytes()).trim());
     }
 }

@@ -7,10 +7,13 @@ import com.alibaba.dubbo.performance.demo.agent.dubbo.model.RpcInvocation;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.model.RpcRequestHolder;
 
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
+import com.alibaba.dubbo.performance.demo.agent.util.HttpUtil;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
@@ -25,7 +28,7 @@ public class RpcClient {
         this.connectManager = new ConnecManager();
     }
 
-    public Object invoke(String interfaceName, String method, String parameterTypesString, String parameter) throws Exception {
+    public void invoke(String interfaceName, String method, String parameterTypesString, String parameter, DeferredResult<ResponseEntity> deferredResult) throws Exception {
 
         Channel channel = connectManager.getChannel();
 
@@ -46,17 +49,17 @@ public class RpcClient {
 
         logger.info("requestId=" + request.getId());
 
-        RpcFuture future = new RpcFuture();
+        RpcFuture future = new RpcFuture((res)-> HttpUtil.Ok(deferredResult, res));
         RpcRequestHolder.put(String.valueOf(request.getId()),future);
 
         channel.writeAndFlush(request);
 
-        Object result = null;
-        try {
-            result = future.get();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return result;
+//        Object result = null;
+//        try {
+//            result = future.get();
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//        return result;
     }
 }
