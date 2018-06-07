@@ -6,8 +6,10 @@ import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
 import com.alibaba.dubbo.performance.demo.agent.util.HttpUtil;
 import okhttp3.*;
+import org.asynchttpclient.AsyncCompletionHandler;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.ListenableFuture;
+import org.asynchttpclient.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -59,6 +61,8 @@ public class HelloController {
         HttpUtil.Ok(deferedResult, result);
     }
 
+
+
     public void consumer(String interfaceName, String method, String parameterTypesString, String parameter, DeferredResult<ResponseEntity> deferedResult) throws Exception {
 
         if (null == endpoints) {
@@ -81,16 +85,12 @@ public class HelloController {
                 .addFormParam("parameter", parameter)
                 .build();
 
-        ListenableFuture<org.asynchttpclient.Response> responseFuture = asyncHttpClient.executeRequest(r);
-
-        Runnable callback = () -> {
-            try {
-                byte[] bytes = responseFuture.get().getResponseBodyAsBytes();
-                HttpUtil.Ok(deferedResult, new String(bytes).trim());
-            } catch (Exception e) {
-                e.printStackTrace();
+        ListenableFuture<org.asynchttpclient.Response> responseFuture = asyncHttpClient.executeRequest(r, new AsyncCompletionHandler<Response>() {
+            @Override
+            public Response onCompleted(Response response) throws Exception {
+                HttpUtil.Ok(deferedResult, response.getResponseBody().trim());
+                return response;
             }
-        };
-        responseFuture.addListener(callback, null);
+        });
     }
 }
