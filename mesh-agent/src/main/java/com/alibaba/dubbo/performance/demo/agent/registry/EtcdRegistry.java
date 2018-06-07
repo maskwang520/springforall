@@ -89,7 +89,7 @@ public class EtcdRegistry implements IRegistry{
             String host = endpointStr.split(":")[0];
             int port = Integer.valueOf(endpointStr.split(":")[1]);
 
-            endpoints.add(new Endpoint(host,port));
+            endpoints.add(new Endpoint(host,port,5));
         }
         return endpoints;
     }
