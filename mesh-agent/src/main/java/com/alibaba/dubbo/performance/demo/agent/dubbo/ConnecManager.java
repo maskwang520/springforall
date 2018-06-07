@@ -7,9 +7,10 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.concurrent.DefaultThreadFactory;
 
 public class ConnecManager {
-    private EventLoopGroup eventLoopGroup = new NioEventLoopGroup(20);
+    private EventLoopGroup eventLoopGroup = new NioEventLoopGroup(2, new DefaultThreadFactory("client", true));
 
     private Bootstrap bootstrap;
 
