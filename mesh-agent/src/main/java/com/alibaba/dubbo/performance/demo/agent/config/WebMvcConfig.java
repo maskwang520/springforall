@@ -25,8 +25,8 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
     @Bean
     public ThreadPoolTaskExecutor threadPoolTaskExecutor() {
         ThreadPoolTaskExecutor t = new ThreadPoolTaskExecutor();
-        t.setCorePoolSize(50);
-        t.setMaxPoolSize(50);
+        t.setCorePoolSize(100);
+        t.setMaxPoolSize(100);
         t.setThreadNamePrefix("Async");
         return t;
     }
