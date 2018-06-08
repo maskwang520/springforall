@@ -26,11 +26,11 @@ public class HelloController {
 
     private Logger logger = LoggerFactory.getLogger(HelloController.class);
 
-    private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
+
     @Autowired
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
     private AsyncHttpClient asyncHttpClient = org.asynchttpclient.Dsl.asyncHttpClient();
-    private RpcClient rpcClient = new RpcClient(registry);
+
     private Random random = new Random();
     private List<Endpoint> endpoints = null;
     private Object lock = new Object();
