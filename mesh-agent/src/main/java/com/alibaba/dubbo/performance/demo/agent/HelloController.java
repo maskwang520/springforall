@@ -33,7 +33,6 @@ public class HelloController {
 
     private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
 
-    @Autowired
     ThreadPoolTaskExecutor threadPoolTaskExecutor;
     private AsyncHttpClient asyncHttpClient = org.asynchttpclient.Dsl.asyncHttpClient();
     private RpcClient rpcClient = new RpcClient(registry);
@@ -42,6 +41,13 @@ public class HelloController {
     private Object lock = new Object();
 //    private OkHttpClient httpClient = new OkHttpClient();
 
+
+    public HelloController() {
+        threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
+        threadPoolTaskExecutor.setCorePoolSize(100);
+        threadPoolTaskExecutor.setMaxPoolSize(100);
+        threadPoolTaskExecutor.setThreadNamePrefix("Async");
+    }
 
     @RequestMapping(value = "")
     public DeferredResult<ResponseEntity> invoke(@RequestParam("interface") String interfaceName,
