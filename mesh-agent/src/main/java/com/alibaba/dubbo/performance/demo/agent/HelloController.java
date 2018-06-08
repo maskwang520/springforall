@@ -83,13 +83,13 @@ public class HelloController {
         ListenableFuture<org.asynchttpclient.Response> responseFuture = asyncHttpClient.executeRequest(r);
         responseFuture.addListener(() -> {
             try {
-                logger.info(Thread.currentThread().getName());
+//                logger.info(Thread.currentThread().getName());
                 HttpUtil.Ok(deferredResult, responseFuture.get().getResponseBody().trim());
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }, threadPoolTaskExecutor);
-        logger.info(Thread.currentThread().getName());
+//        logger.info(Thread.currentThread().getName());
 
 //        CompletableFuture.supplyAsync(() -> {
 //            RequestBody requestBody = new FormBody.Builder()
