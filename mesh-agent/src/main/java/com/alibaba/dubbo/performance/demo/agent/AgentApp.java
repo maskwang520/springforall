@@ -19,9 +19,9 @@ public class AgentApp {
     @Bean
     public ThreadPoolTaskExecutor threadPoolTaskExecutor() {
         ThreadPoolTaskExecutor t = new ThreadPoolTaskExecutor();
-        t.setCorePoolSize(100);
-        t.setMaxPoolSize(100);
-        t.setQueueCapacity(100);
+        t.setCorePoolSize(8);
+        t.setMaxPoolSize(17);
+//        t.setQueueCapacity(100);
         t.setThreadNamePrefix("Async-");
         return t;
     }
