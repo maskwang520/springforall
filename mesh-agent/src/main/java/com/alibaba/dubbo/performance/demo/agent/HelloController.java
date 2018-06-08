@@ -5,7 +5,10 @@ import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
 import com.alibaba.dubbo.performance.demo.agent.util.HttpUtil;
-import okhttp3.*;
+import org.asynchttpclient.AsyncCompletionHandler;
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.ListenableFuture;
+import org.asynchttpclient.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +24,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 public class HelloController {
@@ -29,12 +33,14 @@ public class HelloController {
 
     private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
 
-    //    private AsyncHttpClient asyncHttpClient = org.asynchttpclient.Dsl.asyncHttpClient();
+    @Autowired
+    ThreadPoolTaskExecutor threadPoolTaskExecutor;
+    private AsyncHttpClient asyncHttpClient = org.asynchttpclient.Dsl.asyncHttpClient();
     private RpcClient rpcClient = new RpcClient(registry);
     private Random random = new Random();
     private List<Endpoint> endpoints = null;
     private Object lock = new Object();
-    private OkHttpClient httpClient = new OkHttpClient();
+//    private OkHttpClient httpClient = new OkHttpClient();
 
 
     @RequestMapping(value = "")
@@ -73,42 +79,43 @@ public class HelloController {
 
         String url = "http://" + endpoint.getHost() + ":" + endpoint.getPort();
 
-//        org.asynchttpclient.Request r = org.asynchttpclient.Dsl.post(url)
-//                .addFormParam("interface", interfaceName)
-//                .addFormParam("method", method)
-//                .addFormParam("parameterTypesString", parameterTypesString)
-//                .addFormParam("parameter", parameter)
-//                .build();
-//
-//        ListenableFuture<org.asynchttpclient.Response> responseFuture = asyncHttpClient.executeRequest(r, new AsyncCompletionHandler<Response>() {
-//            @Override
-//            public Response onCompleted(Response response) throws Exception {
-//                HttpUtil.Ok(deferredResult, response.getResponseBody().trim());
-//                return response;
-//            }
-//        });
+        org.asynchttpclient.Request r = org.asynchttpclient.Dsl.post(url)
+                .addFormParam("interface", interfaceName)
+                .addFormParam("method", method)
+                .addFormParam("parameterTypesString", parameterTypesString)
+                .addFormParam("parameter", parameter)
+                .build();
 
-        CompletableFuture.supplyAsync(() -> {
-            RequestBody requestBody = new FormBody.Builder()
-                    .add("interface", interfaceName)
-                    .add("method", method)
-                    .add("parameterTypesString", parameterTypesString)
-                    .add("parameter", parameter)
-                    .build();
-
-            Request request = new Request.Builder()
-                    .url(url)
-                    .post(requestBody)
-                    .build();
-            logger.info("thread-name: " + Thread.currentThread().getName());
-            try (Response response = httpClient.newCall(request).execute()) {
-                byte[] bytes = response.body().bytes();
-                String s = new String(bytes).trim();
-                return Integer.valueOf(s);
-            } catch (IOException e) {
+        ListenableFuture<org.asynchttpclient.Response> responseFuture = asyncHttpClient.executeRequest(r);
+        responseFuture.addListener(() -> {
+            try {
+                HttpUtil.Ok(deferredResult, responseFuture.get().getResponseBody().trim());
+            } catch (Exception e) {
                 e.printStackTrace();
-                return 0;
             }
-        }).whenCompleteAsync((result, throwable) -> HttpUtil.Ok(deferredResult, result));
+        }, threadPoolTaskExecutor);
+
+//        CompletableFuture.supplyAsync(() -> {
+//            RequestBody requestBody = new FormBody.Builder()
+//                    .add("interface", interfaceName)
+//                    .add("method", method)
+//                    .add("parameterTypesString", parameterTypesString)
+//                    .add("parameter", parameter)
+//                    .build();
+//
+//            Request request = new Request.Builder()
+//                    .url(url)
+//                    .post(requestBody)
+//                    .build();
+//            logger.info("thread-name: " + Thread.currentThread().getName());
+//            try (Response response = httpClient.newCall(request).execute()) {
+//                byte[] bytes = response.body().bytes();
+//                String s = new String(bytes).trim();
+//                return Integer.valueOf(s);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                return 0;
+//            }
+//        }).whenCompleteAsync((result, throwable) -> HttpUtil.Ok(deferredResult, result));
     }
 }
