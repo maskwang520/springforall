@@ -29,9 +29,6 @@ public class HelloController {
 
     private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
 
-    @Autowired
-    ThreadPoolTaskExecutor threadPoolTaskExecutor;
-
     //    private AsyncHttpClient asyncHttpClient = org.asynchttpclient.Dsl.asyncHttpClient();
     private RpcClient rpcClient = new RpcClient(registry);
     private Random random = new Random();
@@ -112,6 +109,6 @@ public class HelloController {
                 e.printStackTrace();
                 return 0;
             }
-        },threadPoolTaskExecutor).whenCompleteAsync((result, throwable) -> HttpUtil.Ok(deferredResult, result));
+        }).whenCompleteAsync((result, throwable) -> HttpUtil.Ok(deferredResult, result));
     }
 }
