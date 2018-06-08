@@ -7,7 +7,7 @@ import org.springframework.web.context.request.async.TimeoutCallableProcessingIn
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
-@Configuration
+//@Configuration
 public class WebMvcConfig extends WebMvcConfigurationSupport {
 
     @Override
@@ -27,7 +27,7 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         ThreadPoolTaskExecutor t = new ThreadPoolTaskExecutor();
         t.setCorePoolSize(100);
         t.setMaxPoolSize(100);
-        t.setThreadNamePrefix("Async");
+        t.setThreadNamePrefix("Async-");
         return t;
     }
 }

@@ -5,10 +5,8 @@ import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
 import com.alibaba.dubbo.performance.demo.agent.util.HttpUtil;
-import org.asynchttpclient.AsyncCompletionHandler;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.ListenableFuture;
-import org.asynchttpclient.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 @RestController
 public class HelloController {
@@ -32,8 +27,8 @@ public class HelloController {
     private Logger logger = LoggerFactory.getLogger(HelloController.class);
 
     private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
-
-    ThreadPoolTaskExecutor threadPoolTaskExecutor;
+    @Autowired
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
     private AsyncHttpClient asyncHttpClient = org.asynchttpclient.Dsl.asyncHttpClient();
     private RpcClient rpcClient = new RpcClient(registry);
     private Random random = new Random();
@@ -41,13 +36,6 @@ public class HelloController {
     private Object lock = new Object();
 //    private OkHttpClient httpClient = new OkHttpClient();
 
-
-    public HelloController() {
-        threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
-        threadPoolTaskExecutor.setCorePoolSize(100);
-        threadPoolTaskExecutor.setMaxPoolSize(100);
-        threadPoolTaskExecutor.setThreadNamePrefix("Async");
-    }
 
     @RequestMapping(value = "")
     public DeferredResult<ResponseEntity> invoke(@RequestParam("interface") String interfaceName,
@@ -95,11 +83,13 @@ public class HelloController {
         ListenableFuture<org.asynchttpclient.Response> responseFuture = asyncHttpClient.executeRequest(r);
         responseFuture.addListener(() -> {
             try {
+                logger.info(Thread.currentThread().getName());
                 HttpUtil.Ok(deferredResult, responseFuture.get().getResponseBody().trim());
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }, threadPoolTaskExecutor);
+        logger.info(Thread.currentThread().getName());
 
 //        CompletableFuture.supplyAsync(() -> {
 //            RequestBody requestBody = new FormBody.Builder()
