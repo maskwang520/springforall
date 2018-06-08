@@ -10,24 +10,24 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 @Configuration
 public class WebMvcConfig extends WebMvcConfigurationSupport {
 
-    @Override
-    public void configureAsyncSupport(final AsyncSupportConfigurer configurer) {
-        configurer.setDefaultTimeout(60 * 1000L);
-        configurer.registerCallableInterceptors(timeoutInterceptor());
-        configurer.setTaskExecutor(threadPoolTaskExecutor());
-    }
-
-    @Bean
-    public TimeoutCallableProcessingInterceptor timeoutInterceptor() {
-        return new TimeoutCallableProcessingInterceptor();
-    }
-
+//    @Override
+//    public void configureAsyncSupport(final AsyncSupportConfigurer configurer) {
+//        configurer.setDefaultTimeout(60 * 1000L);
+//        configurer.registerCallableInterceptors(timeoutInterceptor());
+//        configurer.setTaskExecutor(threadPoolTaskExecutor());
+//    }
+//
+//    @Bean
+//    public TimeoutCallableProcessingInterceptor timeoutInterceptor() {
+//        return new TimeoutCallableProcessingInterceptor();
+//    }
+//
     @Bean
     public ThreadPoolTaskExecutor threadPoolTaskExecutor() {
         ThreadPoolTaskExecutor t = new ThreadPoolTaskExecutor();
         t.setCorePoolSize(10);
         t.setMaxPoolSize(50);
-        t.setThreadNamePrefix("YJH");
+        t.setThreadNamePrefix("Async");
         return t;
     }
 }
