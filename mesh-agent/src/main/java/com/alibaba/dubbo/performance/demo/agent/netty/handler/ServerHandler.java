@@ -21,14 +21,14 @@ public class ServerHandler extends SimpleChannelInboundHandler<RequestWrapper> {
     protected void channelRead0(ChannelHandlerContext ctx, RequestWrapper req) {
         ResponseWrapper response = new ResponseWrapper();
         response.requestId = req.requestId;
-        try {
-            handle(req, (result)->{
-                response.result = result;
-                ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-            });
-        } catch (Exception e) {
-            logger.error("handle result failure", e);
-        }
+
+        response.result = "6";
+        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+//            handle(req, (result) -> {
+//                response.result = result;
+//                ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+//                logger.info("write back: " + result);
+//            });
     }
 
     private void handle(RequestWrapper req, Consumer<String> callback) throws Exception {

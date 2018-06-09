@@ -7,7 +7,6 @@ import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.RegistryInstance;
 import com.alibaba.dubbo.performance.demo.agent.util.HttpUtil;
 import org.asynchttpclient.AsyncHttpClient;
-import org.asynchttpclient.ListenableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

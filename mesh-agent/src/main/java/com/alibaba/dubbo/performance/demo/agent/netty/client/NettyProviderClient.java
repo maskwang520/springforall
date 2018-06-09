@@ -1,10 +1,7 @@
 package com.alibaba.dubbo.performance.demo.agent.netty.client;
 
 import com.alibaba.dubbo.performance.demo.agent.netty.handler.ClientHandler;
-import com.alibaba.dubbo.performance.demo.agent.netty.model.RequestEncoder;
-import com.alibaba.dubbo.performance.demo.agent.netty.model.RequestWrapper;
-import com.alibaba.dubbo.performance.demo.agent.netty.model.ResponseDecoder;
-import com.alibaba.dubbo.performance.demo.agent.netty.model.ResponseWrapper;
+import com.alibaba.dubbo.performance.demo.agent.netty.model.*;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -45,8 +42,9 @@ public class NettyProviderClient {
                             pipeline.addLast(new ClientHandler());
                         }
                     });
-            ChannelFuture future = bootstrap.connect(url, port).sync();
+            ChannelFuture future = bootstrap.connect("127.0.0.1", port).sync();
             Channel channel = future.channel();
+            NettyRequestHolder.put(requestWrapper.requestId, consumer);
             channel.writeAndFlush(requestWrapper).sync();
             channel.closeFuture().sync();
             logger.info("channel connected");
@@ -54,6 +52,7 @@ public class NettyProviderClient {
             e.printStackTrace();
         } finally {
             group.shutdownGracefully();
+            NettyRequestHolder.remove(requestWrapper.requestId);
         }
     }
 

@@ -5,6 +5,7 @@ import com.alibaba.dubbo.performance.demo.agent.netty.model.RequestWrapper;
 import com.alibaba.dubbo.performance.demo.agent.netty.model.ResponseDecoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -36,11 +37,11 @@ public class NettyServer implements ApplicationContextAware, InitializingBean {
                         protected void initChannel(SocketChannel channel) {
                             //channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(2048));
                             ChannelPipeline pipeline = channel.pipeline();
-                            pipeline.addLast(new RequestEncoder(RequestWrapper.class));
-                            pipeline.addLast(new ResponseDecoder(ResponseDecoder.class));
+                            pipeline.addLast(new ResponseDecoder(RequestWrapper.class));
+                            pipeline.addLast(new RequestEncoder(ResponseDecoder.class));
                             pipeline.addLast(new ServerHandler());
                         }
-                    }).option(ChannelOption.SO_BACKLOG, 200)
+                    }).option(ChannelOption.SO_BACKLOG, 128)
                     .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     .option(ChannelOption.TCP_NODELAY, true)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
@@ -73,7 +74,6 @@ public class NettyServer implements ApplicationContextAware, InitializingBean {
                         }
                     }).option(ChannelOption.SO_BACKLOG, 128)
                     .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                    .option(ChannelOption.TCP_NODELAY, true)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
             LOGGER.info("netty server start");
             // 绑定端口，开始接收进来的连接
