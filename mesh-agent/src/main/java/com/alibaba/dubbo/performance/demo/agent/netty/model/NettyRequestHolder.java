@@ -5,17 +5,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 public class NettyRequestHolder {
 
     // key: requestId     value: RpcFuture
-    private static ConcurrentHashMap<Integer, Runnable> processingRequest = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Integer, Consumer> processingRequest = new ConcurrentHashMap<>();
 
-    public static void put(Integer requestId, Runnable rpcFuture) {
+    public static void put(Integer requestId, Consumer rpcFuture) {
         processingRequest.put(requestId, rpcFuture);
     }
 
-    public static Runnable get(Integer requestId) {
+    public static Consumer get(Integer requestId) {
         return processingRequest.get(requestId);
     }
 

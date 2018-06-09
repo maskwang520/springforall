@@ -1,6 +1,7 @@
 package com.alibaba.dubbo.performance.demo.agent;
 
 import com.alibaba.dubbo.performance.demo.agent.dubbo.RpcClient;
+import com.alibaba.dubbo.performance.demo.agent.netty.client.NettyProviderClient;
 import com.alibaba.dubbo.performance.demo.agent.netty.model.RequestWrapper;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.RegistryInstance;
@@ -26,7 +27,6 @@ public class HelloController {
 
     private Logger logger = LoggerFactory.getLogger(HelloController.class);
 
-
     @Autowired
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
     private AsyncHttpClient asyncHttpClient = org.asynchttpclient.Dsl.asyncHttpClient();
@@ -36,6 +36,8 @@ public class HelloController {
     private Object lock = new Object();
     private RpcClient rpcClient = new RpcClient(RegistryInstance.getInstance());
     //private OkHttpClient httpClient = new OkHttpClient();
+
+    private NettyProviderClient nettyProviderClient = new NettyProviderClient();
 
 
     @RequestMapping(value = "")
@@ -47,17 +49,13 @@ public class HelloController {
         DeferredResult<ResponseEntity> deferredResult = new DeferredResult<>();
         if ("consumer".equals(type)) {
             consumer(interfaceName, method, parameterTypesString, parameter, deferredResult);
-        } else if ("provider".equals(type)) {
-            provider(interfaceName, method, parameterTypesString, parameter, deferredResult);
-        } else {
-            HttpUtil.Ok(deferredResult, "Environment variable type is needed to set to provider or consumer.");
         }
         return deferredResult;
     }
 
-    public void provider(String interfaceName, String method, String parameterTypesString, String parameter, DeferredResult<ResponseEntity> deferredResult) throws Exception {
-        rpcClient.invoke(interfaceName, method, parameterTypesString, parameter, deferredResult);
-    }
+//    public void provider(String interfaceName, String method, String parameterTypesString, String parameter, DeferredResult<ResponseEntity> deferredResult) throws Exception {
+//        rpcClient.invoke(interfaceName, method, parameterTypesString, parameter, (result) -> HttpUtil.Ok(deferredResult, result));
+//    }
 
     public void consumer(String interfaceName, String method, String parameterTypesString, String parameter, DeferredResult<ResponseEntity> deferredResult) throws Exception {
 
@@ -75,22 +73,7 @@ public class HelloController {
         String url = "http://" + endpoint.getHost() + ":" + endpoint.getPort();
         RequestWrapper requestWrapper = new RequestWrapper(interfaceName, method, parameterTypesString, parameter);
 
+        nettyProviderClient.connect(url, endpoint.getPort(), requestWrapper, (result) -> HttpUtil.Ok(deferredResult, result));
 
-
-        //org.asynchttpclient.Request r = org.asynchttpclient.Dsl.post(url)
-        //        .addFormParam("interface", interfaceName)
-        //        .addFormParam("method", method)
-        //        .addFormParam("parameterTypesString", parameterTypesString)
-        //        .addFormParam("parameter", parameter)
-        //        .build();
-        //
-        //ListenableFuture<org.asynchttpclient.Response> responseFuture = asyncHttpClient.executeRequest(r);
-        //responseFuture.addListener(() -> {
-        //    try {
-        //        HttpUtil.Ok(deferredResult, responseFuture.get().getResponseBody().trim());
-        //    } catch (Exception e) {
-        //        e.printStackTrace();
-        //    }
-        //}, threadPoolTaskExecutor);
     }
 }
