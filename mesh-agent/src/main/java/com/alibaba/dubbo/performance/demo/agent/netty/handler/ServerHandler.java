@@ -25,7 +25,6 @@ public class ServerHandler extends SimpleChannelInboundHandler<RequestWrapper> {
         handle(req, (result) -> {
             response.result = result;
             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-            logger.info("write back: " + result);
         });
     }
 

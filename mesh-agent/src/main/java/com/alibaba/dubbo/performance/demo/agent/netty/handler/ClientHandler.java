@@ -14,13 +14,11 @@ public class ClientHandler extends SimpleChannelInboundHandler<ResponseWrapper> 
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        logger.info("connect to the server now");
         super.channelActive(ctx);
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ResponseWrapper resp) {
-        logger.info("get resp: " + resp.result);
         NettyRequestHolder.get(resp.requestId).accept(resp.result);
         NettyRequestHolder.remove(resp.requestId);
     }
