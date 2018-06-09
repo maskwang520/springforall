@@ -2,6 +2,7 @@ package com.alibaba.dubbo.performance.demo.agent;
 
 import com.alibaba.dubbo.performance.demo.agent.dubbo.RpcClient;
 import com.alibaba.dubbo.performance.demo.agent.netty.client.NettyProviderClient;
+import com.alibaba.dubbo.performance.demo.agent.netty.model.NettyRequestHolder;
 import com.alibaba.dubbo.performance.demo.agent.netty.model.RequestWrapper;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.RegistryInstance;
@@ -20,6 +21,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Consumer;
 
 @RestController
 public class HelloController {
@@ -72,7 +74,10 @@ public class HelloController {
         String url = "http://" + endpoint.getHost() + ":" + endpoint.getPort();
         RequestWrapper requestWrapper = new RequestWrapper(interfaceName, method, parameterTypesString, parameter);
 
-        nettyProviderClient.connect(url, endpoint.getPort(), requestWrapper, (result) -> HttpUtil.Ok(deferredResult, result));
+        Consumer<String> consumer = (result) -> HttpUtil.Ok(deferredResult, result);
+        NettyRequestHolder.put(requestWrapper.requestId, consumer);
+
+        nettyProviderClient.connect(url, endpoint.getPort(), requestWrapper, consumer);
 
     }
 }

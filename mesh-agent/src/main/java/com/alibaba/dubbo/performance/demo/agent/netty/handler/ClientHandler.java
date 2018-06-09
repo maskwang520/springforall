@@ -15,6 +15,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<ResponseWrapper> 
     protected void channelRead0(ChannelHandlerContext ctx, ResponseWrapper resp) throws Exception {
         logger.info("get resp: " + resp.result);
         NettyRequestHolder.get(resp.requestId).accept(resp.result);
+        NettyRequestHolder.remove(resp.requestId);
     }
 
     @Override

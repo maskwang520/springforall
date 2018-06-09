@@ -43,16 +43,13 @@ public class NettyProviderClient {
                         }
                     });
             ChannelFuture future = bootstrap.connect("127.0.0.1", port).sync();
-            Channel channel = future.channel();
-            NettyRequestHolder.put(requestWrapper.requestId, consumer);
-            channel.writeAndFlush(requestWrapper).sync();
-            channel.closeFuture().sync();
+            future.channel().writeAndFlush(requestWrapper);
+            future.channel().closeFuture().sync();
             logger.info("channel connected");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             group.shutdownGracefully();
-            NettyRequestHolder.remove(requestWrapper.requestId);
         }
     }
 

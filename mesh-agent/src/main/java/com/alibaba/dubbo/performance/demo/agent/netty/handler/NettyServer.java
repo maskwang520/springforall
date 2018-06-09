@@ -43,7 +43,6 @@ public class NettyServer implements ApplicationContextAware, InitializingBean {
                         }
                     }).option(ChannelOption.SO_BACKLOG, 128)
                     .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                    .option(ChannelOption.TCP_NODELAY, true)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
             LOGGER.info("netty server start");
             // 绑定端口，开始接收进来的连接
