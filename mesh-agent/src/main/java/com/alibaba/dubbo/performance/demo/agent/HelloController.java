@@ -77,7 +77,7 @@ public class HelloController {
         Consumer<String> consumer = (result) -> HttpUtil.Ok(deferredResult, result);
         NettyRequestHolder.put(requestWrapper.requestId, consumer);
 
-        nettyProviderClient.connect(url, endpoint.getPort(), requestWrapper, consumer);
+        nettyProviderClient.connect(url, endpoint.getPort(), requestWrapper);
 
     }
 }

@@ -3,6 +3,7 @@ package com.alibaba.dubbo.performance.demo.agent.netty.handler;
 import com.alibaba.dubbo.performance.demo.agent.netty.model.RequestEncoder;
 import com.alibaba.dubbo.performance.demo.agent.netty.model.RequestWrapper;
 import com.alibaba.dubbo.performance.demo.agent.netty.model.ResponseDecoder;
+import com.alibaba.dubbo.performance.demo.agent.netty.model.ResponseWrapper;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.UnpooledByteBufAllocator;
@@ -36,14 +37,15 @@ public class NettyServer implements ApplicationContextAware, InitializingBean {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel channel) {
                             //channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(2048));
+                            channel.config().setAllocator(UnpooledByteBufAllocator.DEFAULT);
+                            channel.config().setKeepAlive(true);
+                            channel.config().setTcpNoDelay(true);
                             ChannelPipeline pipeline = channel.pipeline();
                             pipeline.addLast(new ResponseDecoder(RequestWrapper.class));
-                            pipeline.addLast(new RequestEncoder(ResponseDecoder.class));
+                            pipeline.addLast(new RequestEncoder(ResponseWrapper.class));
                             pipeline.addLast(new ServerHandler());
                         }
-                    }).option(ChannelOption.SO_BACKLOG, 128)
-                    .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                    .childOption(ChannelOption.SO_KEEPALIVE, true);
+                    });
             LOGGER.info("netty server start");
             // 绑定端口，开始接收进来的连接
             ChannelFuture future = sbs.bind(port).sync();
@@ -66,14 +68,15 @@ public class NettyServer implements ApplicationContextAware, InitializingBean {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel channel) {
                             //channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(2048));
+                            channel.config().setAllocator(UnpooledByteBufAllocator.DEFAULT);
+                            channel.config().setKeepAlive(true);
+                            channel.config().setTcpNoDelay(true);
                             ChannelPipeline pipeline = channel.pipeline();
                             pipeline.addLast(new HttpResponseEncoder());
                             pipeline.addLast(new HttpRequestDecoder());
                             pipeline.addLast(new HttpServerHandler());
                         }
-                    }).option(ChannelOption.SO_BACKLOG, 128)
-                    .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                    .childOption(ChannelOption.SO_KEEPALIVE, true);
+                    });
             LOGGER.info("netty server start");
             // 绑定端口，开始接收进来的连接
             ChannelFuture future = sbs.bind(port).sync();
