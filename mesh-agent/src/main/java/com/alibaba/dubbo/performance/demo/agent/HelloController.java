@@ -1,9 +1,9 @@
 package com.alibaba.dubbo.performance.demo.agent;
 
 import com.alibaba.dubbo.performance.demo.agent.dubbo.RpcClient;
+import com.alibaba.dubbo.performance.demo.agent.netty.model.RequestWrapper;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
-import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
-import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
+import com.alibaba.dubbo.performance.demo.agent.registry.RegistryInstance;
 import com.alibaba.dubbo.performance.demo.agent.util.HttpUtil;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.ListenableFuture;
@@ -34,7 +34,8 @@ public class HelloController {
     private Random random = new Random();
     private List<Endpoint> endpoints = null;
     private Object lock = new Object();
-//    private OkHttpClient httpClient = new OkHttpClient();
+    private RpcClient rpcClient = new RpcClient(RegistryInstance.getInstance());
+    //private OkHttpClient httpClient = new OkHttpClient();
 
 
     @RequestMapping(value = "")
@@ -63,7 +64,7 @@ public class HelloController {
         if (null == endpoints) {
             synchronized (lock) {
                 if (null == endpoints) {
-                    endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
+                    endpoints = RegistryInstance.getInstance().find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
                 }
             }
         }
@@ -72,46 +73,24 @@ public class HelloController {
         Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
 
         String url = "http://" + endpoint.getHost() + ":" + endpoint.getPort();
+        RequestWrapper requestWrapper = new RequestWrapper(interfaceName, method, parameterTypesString, parameter);
 
-        org.asynchttpclient.Request r = org.asynchttpclient.Dsl.post(url)
-                .addFormParam("interface", interfaceName)
-                .addFormParam("method", method)
-                .addFormParam("parameterTypesString", parameterTypesString)
-                .addFormParam("parameter", parameter)
-                .build();
 
-        ListenableFuture<org.asynchttpclient.Response> responseFuture = asyncHttpClient.executeRequest(r);
-        responseFuture.addListener(() -> {
-            try {
-//                logger.info(Thread.currentThread().getName());
-                HttpUtil.Ok(deferredResult, responseFuture.get().getResponseBody().trim());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }, threadPoolTaskExecutor);
-//        logger.info(Thread.currentThread().getName());
 
-//        CompletableFuture.supplyAsync(() -> {
-//            RequestBody requestBody = new FormBody.Builder()
-//                    .add("interface", interfaceName)
-//                    .add("method", method)
-//                    .add("parameterTypesString", parameterTypesString)
-//                    .add("parameter", parameter)
-//                    .build();
-//
-//            Request request = new Request.Builder()
-//                    .url(url)
-//                    .post(requestBody)
-//                    .build();
-//            logger.info("thread-name: " + Thread.currentThread().getName());
-//            try (Response response = httpClient.newCall(request).execute()) {
-//                byte[] bytes = response.body().bytes();
-//                String s = new String(bytes).trim();
-//                return Integer.valueOf(s);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//                return 0;
-//            }
-//        }).whenCompleteAsync((result, throwable) -> HttpUtil.Ok(deferredResult, result));
+        //org.asynchttpclient.Request r = org.asynchttpclient.Dsl.post(url)
+        //        .addFormParam("interface", interfaceName)
+        //        .addFormParam("method", method)
+        //        .addFormParam("parameterTypesString", parameterTypesString)
+        //        .addFormParam("parameter", parameter)
+        //        .build();
+        //
+        //ListenableFuture<org.asynchttpclient.Response> responseFuture = asyncHttpClient.executeRequest(r);
+        //responseFuture.addListener(() -> {
+        //    try {
+        //        HttpUtil.Ok(deferredResult, responseFuture.get().getResponseBody().trim());
+        //    } catch (Exception e) {
+        //        e.printStackTrace();
+        //    }
+        //}, threadPoolTaskExecutor);
     }
 }

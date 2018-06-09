@@ -18,6 +18,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.function.Consumer;
 
 public class RpcClient {
     private Logger logger = LoggerFactory.getLogger(RpcClient.class);
@@ -28,7 +29,7 @@ public class RpcClient {
         this.connectManager = new ConnecManager();
     }
 
-    public void invoke(String interfaceName, String method, String parameterTypesString, String parameter, DeferredResult<ResponseEntity> deferredResult) throws Exception {
+    public void invoke(String interfaceName, String method, String parameterTypesString, String parameter, Consumer<String> callback) throws Exception {
 
         Channel channel = connectManager.getChannel();
 
@@ -49,7 +50,7 @@ public class RpcClient {
 
 //        logger.info("requestId=" + request.getId());
 
-        RpcFuture future = new RpcFuture((res)-> HttpUtil.Ok(deferredResult, res));
+        RpcFuture future = new RpcFuture(callback);
         RpcRequestHolder.put(String.valueOf(request.getId()),future);
 
         channel.writeAndFlush(request);
