@@ -26,58 +26,58 @@ import java.util.function.Consumer;
 //@RestController
 public class HelloController {
 
-    private Logger logger = LoggerFactory.getLogger(HelloController.class);
-
-    @Autowired
-    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
-    private AsyncHttpClient asyncHttpClient = org.asynchttpclient.Dsl.asyncHttpClient();
-
-    private Random random = new Random();
-    private List<Endpoint> endpoints = null;
-    private Object lock = new Object();
-    private RpcClient rpcClient = new RpcClient(RegistryInstance.getInstance());
-    //private OkHttpClient httpClient = new OkHttpClient();
-
-    private NettyProviderClient nettyProviderClient = new NettyProviderClient();
-
-
-    @RequestMapping(value = "")
-    public DeferredResult<ResponseEntity> invoke(@RequestParam("interface") String interfaceName,
-                                                 @RequestParam("method") String method,
-                                                 @RequestParam("parameterTypesString") String parameterTypesString,
-                                                 @RequestParam("parameter") String parameter, HttpServletResponse response) throws Exception {
-        String type = System.getProperty("type");   // 获取type参数
-        DeferredResult<ResponseEntity> deferredResult = new DeferredResult<>();
-        if ("consumer".equals(type)) {
-            consumer(interfaceName, method, parameterTypesString, parameter, deferredResult);
-        }
-        return deferredResult;
-    }
-
-//    public void provider(String interfaceName, String method, String parameterTypesString, String parameter, DeferredResult<ResponseEntity> deferredResult) throws Exception {
-//        rpcClient.invoke(interfaceName, method, parameterTypesString, parameter, (result) -> HttpUtil.Ok(deferredResult, result));
+//    private Logger logger = LoggerFactory.getLogger(HelloController.class);
+//
+//    @Autowired
+//    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
+//    private AsyncHttpClient asyncHttpClient = org.asynchttpclient.Dsl.asyncHttpClient();
+//
+//    private Random random = new Random();
+//    private List<Endpoint> endpoints = null;
+//    private Object lock = new Object();
+//    private RpcClient rpcClient = new RpcClient(RegistryInstance.getInstance());
+//    //private OkHttpClient httpClient = new OkHttpClient();
+//
+//    private NettyProviderClient nettyProviderClient = new NettyProviderClient();
+//
+//
+//    @RequestMapping(value = "")
+//    public DeferredResult<ResponseEntity> invoke(@RequestParam("interface") String interfaceName,
+//                                                 @RequestParam("method") String method,
+//                                                 @RequestParam("parameterTypesString") String parameterTypesString,
+//                                                 @RequestParam("parameter") String parameter, HttpServletResponse response) throws Exception {
+//        String type = System.getProperty("type");   // 获取type参数
+//        DeferredResult<ResponseEntity> deferredResult = new DeferredResult<>();
+//        if ("consumer".equals(type)) {
+//            consumer(interfaceName, method, parameterTypesString, parameter, deferredResult);
+//        }
+//        return deferredResult;
 //    }
-
-    public void consumer(String interfaceName, String method, String parameterTypesString, String parameter, DeferredResult<ResponseEntity> deferredResult) throws Exception {
-
-        if (null == endpoints) {
-            synchronized (lock) {
-                if (null == endpoints) {
-                    endpoints = RegistryInstance.getInstance().find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
-                }
-            }
-        }
-
-        // 简单的负载均衡，随机取一个
-        Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
-
-        String url = "http://" + endpoint.getHost() + ":" + endpoint.getPort();
-        RequestWrapper requestWrapper = new RequestWrapper(interfaceName, method, parameterTypesString, parameter);
-
-        Consumer<String> consumer = (result) -> HttpUtil.Ok(deferredResult, result);
-        NettyRequestHolder.put(requestWrapper.requestId, consumer);
-
-        nettyProviderClient.connect(url, endpoint.getPort(), requestWrapper);
-
-    }
+//
+////    public void provider(String interfaceName, String method, String parameterTypesString, String parameter, DeferredResult<ResponseEntity> deferredResult) throws Exception {
+////        rpcClient.invoke(interfaceName, method, parameterTypesString, parameter, (result) -> HttpUtil.Ok(deferredResult, result));
+////    }
+//
+//    public void consumer(String interfaceName, String method, String parameterTypesString, String parameter, DeferredResult<ResponseEntity> deferredResult) throws Exception {
+//
+//        if (null == endpoints) {
+//            synchronized (lock) {
+//                if (null == endpoints) {
+//                    endpoints = RegistryInstance.getInstance().find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
+//                }
+//            }
+//        }
+//
+//        // 简单的负载均衡，随机取一个
+//        Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
+//
+//        String url = "http://" + endpoint.getHost() + ":" + endpoint.getPort();
+//        RequestWrapper requestWrapper = new RequestWrapper(interfaceName, method, parameterTypesString, parameter);
+//
+//        Consumer<String> consumer = (result) -> HttpUtil.Ok(deferredResult, result);
+//        NettyRequestHolder.put(requestWrapper.requestId, consumer);
+//
+//        nettyProviderClient.connect(url, endpoint.getPort(), requestWrapper);
+//
+//    }
 }

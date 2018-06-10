@@ -1,17 +1,20 @@
 package com.alibaba.dubbo.performance.demo.agent.netty.handler;
 
 import com.alibaba.dubbo.performance.demo.agent.netty.client.NettyProviderClient;
-import com.alibaba.dubbo.performance.demo.agent.netty.model.NettyRequestHolder;
-import com.alibaba.dubbo.performance.demo.agent.netty.model.RequestWrapper;
+import com.alibaba.dubbo.performance.demo.agent.netty.model.*;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.RegistryInstance;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.*;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
 import io.netty.handler.codec.http.multipart.HttpDataFactory;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.netty.handler.codec.http.cookie.Cookie;
@@ -25,9 +28,12 @@ import static org.apache.http.cookie.SM.COOKIE;
 /**
  * Created this one by huminghao on 2018/6/9.
  */
-public class HttpServerHandler extends SimpleChannelInboundHandler<HttpObject> {
+public class HttpServerHandler extends ChannelInboundHandlerAdapter {
+
+    private static List<Endpoint> endpoints = null;
 
     private HttpRequest request;
+    private Channel outboundChannel;
 
     private boolean readingChunks;
 
@@ -44,27 +50,9 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpObject> {
         ctx.flush();
     }
 
-    //@Override
-    //protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-    //    FullHttpRequest httpRequest = (FullHttpRequest) msg;
-    //    Map<String, String> data = HttpParser.parse(httpRequest);
-    //
-    //    consumer(data.get("interfaceName"), data.get("method"), data.get("parameterTypesString"),data.get("parameter"),(result) -> ctx.writeAndFlush(result).addListener(ChannelFutureListener.CLOSE));
-    //}
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, HttpObject msg) throws Exception {
-
-    }
-
-    private Random random = new Random();
-    private List<Endpoint> endpoints = null;
-    private Object lock = new Object();
-    private NettyProviderClient nettyProviderClient = new NettyProviderClient();
-
-
-    public void consumer(String interfaceName, String method, String parameterTypesString, String parameter, Consumer<String> consumer) throws Exception {
-
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
         if (null == endpoints) {
             synchronized (lock) {
                 if (null == endpoints) {
@@ -75,25 +63,82 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpObject> {
 
         // 简单的负载均衡，随机取一个
         Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
+        final Channel inboundChannel = ctx.channel();
+        //
+        // Start the connection attempt.
+        Bootstrap b = new Bootstrap();
+        b.group(inboundChannel.eventLoop())
+                .channel(ctx.channel().getClass())
+                .handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        ChannelPipeline pipeline = ch.pipeline();
+                        pipeline.addLast("codec", new HttpClientCodec());
+                        pipeline.addLast(new HttpObjectAggregator(512 * 1024));
+                        pipeline.addLast(new LoggingHandler(LogLevel.INFO));
+                        pipeline.addLast(new ClientHandler(inboundChannel));
+                    }
+                })
+                        .option(ChannelOption.AUTO_READ, false);
+        ChannelFuture f = b.connect(endpoint.getHost(), endpoint.getPort());
 
-        String url = "http://" + endpoint.getHost() + ":" + endpoint.getPort();
-        RequestWrapper requestWrapper = new RequestWrapper(interfaceName, method, parameterTypesString, parameter);
-
-        NettyRequestHolder.put(requestWrapper.requestId, consumer);
-        nettyProviderClient.connect(url, endpoint.getPort(), requestWrapper);
-
+        outboundChannel = f.channel();
+        f.addListener((ChannelFutureListener) future -> {
+            if (future.isSuccess()) {
+                // connection complete start to read first data
+                inboundChannel.read();
+            } else {
+                // Close the connection if the connection attempt has failed.
+                inboundChannel.close();
+            }
+        });
     }
+
+    /**
+     * Closes the specified channel after all queued write requests are flushed.
+     */
+    static void closeOnFlush(Channel ch) {
+        if (ch.isActive()) {
+            ch.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+        }
+    }
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (outboundChannel.isActive()) {
+            outboundChannel.writeAndFlush(msg).addListener((ChannelFutureListener) future -> {
+                if (future.isSuccess()) {
+                    ctx.channel().read();
+                } else {
+                    future.channel().close();
+                }
+            });
+        }
+    }
+
+    private Random random = new Random();
+    private Object lock = new Object();
+    private NettyProviderClient nettyProviderClient = new NettyProviderClient();
+
+
+    //public void consumer(String interfaceName, String method, String parameterTypesString, String parameter, Consumer<String> consumer) throws Exception {
+    //
+    //
+    //
+    //    String url = "http://" + endpoint.getHost() + ":" + endpoint.getPort();
+    //    RequestWrapper requestWrapper = new RequestWrapper(interfaceName, method, parameterTypesString, parameter);
+    //
+    //    NettyRequestHolder.put(requestWrapper.requestId, consumer);
+    //    nettyProviderClient.connect(url, endpoint.getPort(), requestWrapper);
+    //
+    //}
 
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         cause.printStackTrace();
-        ctx.close();
+        closeOnFlush(ctx.channel());
     }
-
-    private static final HttpDataFactory factory = new DefaultHttpDataFactory(DefaultHttpDataFactory.MINSIZE); //Disk
-
-    private HttpPostRequestDecoder decoder;
 
 
 }

@@ -1,21 +1,38 @@
 package com.alibaba.dubbo.performance.demo.agent.netty.handler;
 
-import com.alibaba.dubbo.performance.demo.agent.netty.model.NettyRequestHolder;
-import com.alibaba.dubbo.performance.demo.agent.netty.model.ResponseWrapper;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClientHandler extends SimpleChannelInboundHandler<ResponseWrapper> {
+public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     private Logger logger = LoggerFactory.getLogger(ClientHandler.class);
 
+    private final Channel inboundChannel;
+
+    public ClientHandler(Channel inboundChannel) {
+        this.inboundChannel = inboundChannel;
+    }
+
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, ResponseWrapper resp) {
-        NettyRequestHolder.get(resp.requestId).accept(resp.result);
-        NettyRequestHolder.remove(resp.requestId);
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        ctx.read();
+    }
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        inboundChannel.writeAndFlush(msg).addListener((ChannelFutureListener) future -> {
+            if (future.isSuccess()) {
+                ctx.channel().read();
+            } else {
+                future.channel().close();
+            }
+        });
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        HttpServerHandler.closeOnFlush(ctx.channel());
     }
 
     @Override
