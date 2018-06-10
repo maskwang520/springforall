@@ -13,11 +13,6 @@ public class ClientHandler extends SimpleChannelInboundHandler<ResponseWrapper> 
     private Logger logger = LoggerFactory.getLogger(ClientHandler.class);
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
-    }
-
-    @Override
     protected void channelRead0(ChannelHandlerContext ctx, ResponseWrapper resp) {
         NettyRequestHolder.get(resp.requestId).accept(resp.result);
         NettyRequestHolder.remove(resp.requestId);
@@ -26,6 +21,8 @@ public class ClientHandler extends SimpleChannelInboundHandler<ResponseWrapper> 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.error("get error:", cause);
+        NettyRequestHolder.get(resp.requestId).accept(resp.result);
+        NettyRequestHolder.remove(resp.requestId);
         ctx.close();
     }
 }
