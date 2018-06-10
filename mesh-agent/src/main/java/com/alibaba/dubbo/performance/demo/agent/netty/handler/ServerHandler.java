@@ -35,6 +35,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<RequestWrapper> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         cause.printStackTrace();
+        ctx.writeAndFlush(new ResponseWrapper());
         ctx.close();
     }
 }

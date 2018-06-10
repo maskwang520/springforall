@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
 
-@RestController
+//@RestController
 public class HelloController {
 
     private Logger logger = LoggerFactory.getLogger(HelloController.class);

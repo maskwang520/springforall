@@ -8,7 +8,7 @@ import io.netty.handler.codec.MessageToByteEncoder;
 
 import java.util.List;
 
-public class ResponseDecoder extends ByteToMessageDecoder{
+public class ResponseDecoder extends ByteToMessageDecoder {
     private Class<?> genericClass;
 
     public ResponseDecoder(Class<?> genericClass) {
@@ -22,7 +22,7 @@ public class ResponseDecoder extends ByteToMessageDecoder{
         }
         in.markReaderIndex();
         int dataLength = in.readInt();
-        if (in.readableBytes() < dataLength) {
+        if (dataLength < 0 || in.readableBytes() < dataLength) {
             return;
         }
         byte[] data = new byte[dataLength];

@@ -21,8 +21,6 @@ public class ClientHandler extends SimpleChannelInboundHandler<ResponseWrapper> 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.error("get error:", cause);
-        NettyRequestHolder.get(resp.requestId).accept(resp.result);
-        NettyRequestHolder.remove(resp.requestId);
         ctx.close();
     }
 }

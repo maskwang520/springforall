@@ -11,6 +11,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import org.slf4j.Logger;
@@ -39,7 +40,7 @@ public class NettyServer implements ApplicationContextAware, InitializingBean {
                             //channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(2048));
                             channel.config().setAllocator(UnpooledByteBufAllocator.DEFAULT);
                             channel.config().setKeepAlive(true);
-                            channel.config().setTcpNoDelay(true);
+                            //channel.config().setTcpNoDelay(true);
                             ChannelPipeline pipeline = channel.pipeline();
                             pipeline.addLast(new ResponseDecoder(RequestWrapper.class));
                             pipeline.addLast(new RequestEncoder(ResponseWrapper.class));
@@ -67,13 +68,12 @@ public class NettyServer implements ApplicationContextAware, InitializingBean {
                     .localAddress(new InetSocketAddress(port))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel channel) {
-                            //channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(2048));
-                            channel.config().setAllocator(UnpooledByteBufAllocator.DEFAULT);
+                            channel.config().setAllocator(PooledByteBufAllocator.DEFAULT);
                             channel.config().setKeepAlive(true);
                             channel.config().setTcpNoDelay(true);
                             ChannelPipeline pipeline = channel.pipeline();
-                            pipeline.addLast(new HttpResponseEncoder());
                             pipeline.addLast(new HttpRequestDecoder());
+                            pipeline.addLast(new HttpResponseEncoder());
                             pipeline.addLast(new HttpServerHandler());
                         }
                     });
@@ -93,7 +93,7 @@ public class NettyServer implements ApplicationContextAware, InitializingBean {
     public void afterPropertiesSet() throws Exception {
         String type = System.getProperty("type");   // 获取type参数
         if ("consumer".equals(type)) {
-
+            consumerServerStart(20000);
         }else{
             providerServerStart(19980);
         }
