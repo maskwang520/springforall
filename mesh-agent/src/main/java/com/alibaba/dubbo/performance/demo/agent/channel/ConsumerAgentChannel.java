@@ -4,6 +4,7 @@ import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.connectionpool.
 import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.modle.RegistrySingleton;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
+import com.alibaba.dubbo.performance.demo.agent.util.ChannelPoolMap;
 import io.netty.channel.Channel;
 import io.netty.channel.pool.SimpleChannelPool;
 import org.slf4j.Logger;
@@ -22,7 +23,6 @@ public class ConsumerAgentChannel {
 
     private static Random random = new Random();
     private static List<Endpoint> endpoints = null;
-    private static Object lock = new Object();
     private static NettyPoolClient client ;
 
     public static Channel getChannel(NettyPoolClient client1) throws Exception{
@@ -30,7 +30,7 @@ public class ConsumerAgentChannel {
         IRegistry registry = RegistrySingleton.getInstance();
 
         if (null == endpoints) {
-            synchronized (lock) {
+            synchronized (ConsumerAgentChannel.class) {
                 if (null == endpoints) {
                     endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
                     LOGGER.info("endpoint's size is{}", endpoints.size());
@@ -43,6 +43,9 @@ public class ConsumerAgentChannel {
         InetSocketAddress addr = new InetSocketAddress(endpoint.getHost(), endpoint.getPort());
         SimpleChannelPool pool = client.poolMap.get(addr);
         Channel channel = pool.acquire().get();
+        if(!ChannelPoolMap.contain(channel.remoteAddress().toString())){
+            ChannelPoolMap.put(channel.remoteAddress().toString(),pool);
+        }
         return channel;
     }
 }
