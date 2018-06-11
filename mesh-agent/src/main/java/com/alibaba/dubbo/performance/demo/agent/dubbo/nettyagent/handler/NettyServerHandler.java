@@ -3,6 +3,7 @@ package com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.handler;
 import com.alibaba.dubbo.performance.demo.agent.channel.ConsumerAgentChannel;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.connectionpool.NettyPoolClient;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.modle.ChannelContextHolder;
+import com.alibaba.dubbo.performance.demo.agent.util.ChannelPoolMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -11,6 +12,8 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +46,13 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
             byteBuf.writeInt(requestId);
             byteBuf.writeBytes(buf);
             ReferenceCountUtil.retain(buf);
-            channel.writeAndFlush(byteBuf);
+            //释放有问题
+            channel.writeAndFlush(byteBuf).addListener(new GenericFutureListener<Future<? super Void>>() {
+                @Override
+                public void operationComplete(Future<? super Void> future) throws Exception {
+                    ChannelPoolMap.get(channel.remoteAddress().toString()).release(channel);
+                }
+            });
 //            String []hosts = channel.remoteAddress().toString().split(":");
 //            client.poolMap.get(new InetSocketAddress(hosts[0].substring(1,hosts[0].length()),Integer.valueOf(hosts[1]))).release(channel);
 

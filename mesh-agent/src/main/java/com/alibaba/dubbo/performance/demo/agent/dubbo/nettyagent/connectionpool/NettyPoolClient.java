@@ -32,7 +32,7 @@ public class NettyPoolClient {
         poolMap = new AbstractChannelPoolMap<InetSocketAddress, SimpleChannelPool>() {
             @Override
             protected SimpleChannelPool newPool(InetSocketAddress key) {
-                return new FixedChannelPool(strap.remoteAddress(key), new NettyChannelPoolHandler(),Integer.MAX_VALUE);
+                return new FixedChannelPool(strap.remoteAddress(key), new NettyChannelPoolHandler(),64);
             }
         };
     }
