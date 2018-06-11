@@ -32,8 +32,10 @@ public class ClientHandler extends SimpleChannelInboundHandler {
 //        if(channelContext==null){
 //            LOGGER.info("channelcontext is null");
 //        }
-        ChannelContextHolder.removeChannelContext((Integer.valueOf(agentRpcResponse.getRequestId())));
-        channelContext.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        if(channelContext!=null) {
+            ChannelContextHolder.removeChannelContext((Integer.valueOf(agentRpcResponse.getRequestId())));
+            channelContext.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        }
 
 
     }

@@ -5,7 +5,6 @@ import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.handler.NettySe
 import com.alibaba.dubbo.performance.demo.agent.util.DubboChannelContextHolder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
@@ -29,7 +28,7 @@ public class RpcClientHandler extends SimpleChannelInboundHandler<RpcResponse> {
 
         ChannelHandlerContext handlerContext = DubboChannelContextHolder.getChannelContext((Integer.valueOf(requestId)));
         if(handlerContext!=null) {
-            handlerContext.writeAndFlush(byteBuf).addListener(ChannelFutureListener.CLOSE);
+            handlerContext.writeAndFlush(byteBuf);
             DubboChannelContextHolder.removeChannelContext(Integer.valueOf(requestId));
         }else{
             return;

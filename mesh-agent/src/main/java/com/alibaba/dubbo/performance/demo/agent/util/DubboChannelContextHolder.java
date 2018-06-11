@@ -2,14 +2,14 @@ package com.alibaba.dubbo.performance.demo.agent.util;
 
 import io.netty.channel.ChannelHandlerContext;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by maskwang on 18-6-9.
  */
 public class DubboChannelContextHolder {
 
-    private static  HashMap<Integer,ChannelHandlerContext> channelMap = new HashMap<>();
+    private static ConcurrentHashMap<Integer,ChannelHandlerContext> channelMap = new ConcurrentHashMap<>();
 
     public static ChannelHandlerContext getChannelContext(Integer requestId){
         return channelMap.get(requestId);
