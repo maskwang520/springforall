@@ -36,11 +36,16 @@ public class FullMsgServerHandler extends SimpleChannelInboundHandler<FullHttpRe
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
         Map<String, String> data = HttpParser.parse(msg);
         System.out.println(data);
-        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer("666".getBytes()));
-        response.headers().set(CONTENT_TYPE, "text/plain");
-        response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());
-        ctx.write(response);
-        ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+        handle(new RequestWrapper(data.get("interface"),
+                data.get("method"),
+                data.get("parameterTypesString"),
+                data.get("parameter")), (result) -> {
+            FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(result.getBytes()));
+            response.headers().set(CONTENT_TYPE, "text/plain");
+            response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());
+            ctx.write(response);
+            ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+        });
     }
 
     private void handle(RequestWrapper req, Consumer<String> callback) throws Exception {

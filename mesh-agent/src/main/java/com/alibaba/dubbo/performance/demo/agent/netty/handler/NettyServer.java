@@ -44,7 +44,7 @@ public class NettyServer implements ApplicationContextAware, InitializingBean {
                             //channel.config().setTcpNoDelay(true);
                             ChannelPipeline pipeline = channel.pipeline();
                             pipeline.addLast(new HttpRequestDecoder());
-                            pipeline.addLast(new HttpResponseEncoder());
+//                            pipeline.addLast(new HttpResponseEncoder());
                             pipeline.addLast("codec", new HttpServerCodec());
                             //pipeline.addLast(new HttpServerExpectContinueHandler());
                             pipeline.addLast(new HttpObjectAggregator(512 * 1024));

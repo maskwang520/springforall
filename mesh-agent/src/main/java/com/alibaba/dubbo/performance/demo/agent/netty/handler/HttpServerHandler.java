@@ -63,7 +63,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                     }
                 })
                 .option(ChannelOption.AUTO_READ, false);
-        ChannelFuture f = b.connect("www.baidu.com", 443);
+        ChannelFuture f = b.connect(endpoint.getHost(), endpoint.getPort());
 
         outboundChannel = f.channel();
         f.addListener((ChannelFutureListener) future -> {
