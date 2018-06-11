@@ -2,7 +2,7 @@ package com.alibaba.dubbo.performance.demo.agent.dubbo;
 
 import com.alibaba.dubbo.performance.demo.agent.dubbo.model.RpcResponse;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.handler.NettyServerHandler;
-import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.modle.DubboChannelContextHolder;
+import com.alibaba.dubbo.performance.demo.agent.util.DubboChannelContextHolder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;

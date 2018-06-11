@@ -1,4 +1,4 @@
-package com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.modle;
+package com.alibaba.dubbo.performance.demo.agent.util;
 
 import io.netty.channel.ChannelHandlerContext;
 

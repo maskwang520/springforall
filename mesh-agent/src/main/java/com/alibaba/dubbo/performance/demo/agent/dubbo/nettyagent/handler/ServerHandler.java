@@ -1,7 +1,7 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.handler;
 
 import com.alibaba.dubbo.performance.demo.agent.dubbo.RpcClient;
-import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.modle.DubboChannelContextHolder;
+import com.alibaba.dubbo.performance.demo.agent.util.DubboChannelContextHolder;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.modle.RequestProtocol;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
