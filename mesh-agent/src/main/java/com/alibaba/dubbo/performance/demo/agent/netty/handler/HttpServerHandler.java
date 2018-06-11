@@ -57,7 +57,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
-                        ch.pipeline().addLast(new LoggingHandler(LogLevel.INFO));
+//                        ch.pipeline().addLast(new LoggingHandler(LogLevel.INFO));
 
                         ch.pipeline().addLast(new ClientHandler(inboundChannel));
                     }
