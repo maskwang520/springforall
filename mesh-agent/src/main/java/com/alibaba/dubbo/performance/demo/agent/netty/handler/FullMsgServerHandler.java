@@ -35,7 +35,6 @@ public class FullMsgServerHandler extends SimpleChannelInboundHandler<FullHttpRe
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
         Map<String, String> data = HttpParser.parse(msg);
-        System.out.println(data);
         handle(new RequestWrapper(data.get("interface"),
                 data.get("method"),
                 data.get("parameterTypesString"),
@@ -55,7 +54,7 @@ public class FullMsgServerHandler extends SimpleChannelInboundHandler<FullHttpRe
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         cause.printStackTrace();
-        ctx.writeAndFlush(new ResponseWrapper());
+        ctx.writeAndFlush(Unpooled.EMPTY_BUFFER);
         ctx.close();
     }
 }
