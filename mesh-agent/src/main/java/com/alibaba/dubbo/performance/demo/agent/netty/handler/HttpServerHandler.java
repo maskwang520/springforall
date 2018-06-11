@@ -32,24 +32,9 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 
     private static List<Endpoint> endpoints = null;
 
-    private HttpRequest request;
     private Channel outboundChannel;
 
-    private boolean readingChunks;
-
-    private final StringBuilder responseContent = new StringBuilder();
-
-    private static final HttpDataFactory factory = new DefaultHttpDataFactory(DefaultHttpDataFactory.MINSIZE); //Disk
-
-    private HttpPostRequestDecoder decoder;
-
     private Logger logger = LoggerFactory.getLogger(HttpServerHandler.class);
-
-    @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        ctx.flush();
-    }
-
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -72,15 +57,13 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
-                        ChannelPipeline pipeline = ch.pipeline();
-                        pipeline.addLast("codec", new HttpClientCodec());
-                        pipeline.addLast(new HttpObjectAggregator(512 * 1024));
-                        pipeline.addLast(new LoggingHandler(LogLevel.INFO));
-                        pipeline.addLast(new ClientHandler(inboundChannel));
+                        ch.pipeline().addLast(new LoggingHandler(LogLevel.INFO));
+
+                        ch.pipeline().addLast(new ClientHandler(inboundChannel));
                     }
                 })
-                        .option(ChannelOption.AUTO_READ, false);
-        ChannelFuture f = b.connect(endpoint.getHost(), endpoint.getPort());
+                .option(ChannelOption.AUTO_READ, false);
+        ChannelFuture f = b.connect("www.baidu.com", 443);
 
         outboundChannel = f.channel();
         f.addListener((ChannelFutureListener) future -> {
@@ -100,6 +83,8 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
     static void closeOnFlush(Channel ch) {
         if (ch.isActive()) {
             ch.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+        }else{
+            ch.close();
         }
     }
 
@@ -120,8 +105,14 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
     private Object lock = new Object();
     private NettyProviderClient nettyProviderClient = new NettyProviderClient();
 
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        if (outboundChannel != null) {
+            closeOnFlush(outboundChannel);
+        }
+    }
 
-    //public void consumer(String interfaceName, String method, String parameterTypesString, String parameter, Consumer<String> consumer) throws Exception {
+//public void consumer(String interfaceName, String method, String parameterTypesString, String parameter, Consumer<String> consumer) throws Exception {
     //
     //
     //
