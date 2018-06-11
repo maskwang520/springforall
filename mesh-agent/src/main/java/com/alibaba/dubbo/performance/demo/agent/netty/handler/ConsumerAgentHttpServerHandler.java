@@ -1,40 +1,27 @@
 package com.alibaba.dubbo.performance.demo.agent.netty.handler;
 
-import com.alibaba.dubbo.performance.demo.agent.netty.client.NettyProviderClient;
-import com.alibaba.dubbo.performance.demo.agent.netty.model.*;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.RegistryInstance;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
-import io.netty.handler.codec.http.multipart.HttpDataFactory;
-import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
-import io.netty.handler.codec.http.multipart.InterfaceHttpData;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.netty.handler.codec.http.cookie.Cookie;
 
-import java.net.URI;
-import java.util.*;
-import java.util.function.Consumer;
-
-import static org.apache.http.cookie.SM.COOKIE;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Created this one by huminghao on 2018/6/9.
  */
-public class HttpServerHandler extends ChannelInboundHandlerAdapter {
+public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter {
 
     private static List<Endpoint> endpoints = null;
 
     private Channel outboundChannel;
 
-    private Logger logger = LoggerFactory.getLogger(HttpServerHandler.class);
+    private Logger logger = LoggerFactory.getLogger(ConsumerAgentHttpServerHandler.class);
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -58,8 +45,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
 //                        ch.pipeline().addLast(new LoggingHandler(LogLevel.INFO));
-
-                        ch.pipeline().addLast(new ClientHandler(inboundChannel));
+                        ch.pipeline().addLast(new ConsumerAgentHttpClientHandler(inboundChannel));
                     }
                 })
                 .option(ChannelOption.AUTO_READ, false);
@@ -72,7 +58,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                 inboundChannel.read();
             } else {
                 // Close the connection if the connection attempt has failed.
-                inboundChannel.close();
+                //inboundChannel.close();
             }
         });
     }
@@ -82,9 +68,9 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
      */
     static void closeOnFlush(Channel ch) {
         if (ch.isActive()) {
-            ch.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+            ch.writeAndFlush(Unpooled.EMPTY_BUFFER);
         }else{
-            ch.close();
+            //ch.close();
         }
     }
 
@@ -95,7 +81,7 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
                 if (future.isSuccess()) {
                     ctx.channel().read();
                 } else {
-                    future.channel().close();
+                    //future.channel().close();
                 }
             });
         }
@@ -103,7 +89,6 @@ public class HttpServerHandler extends ChannelInboundHandlerAdapter {
 
     private Random random = new Random();
     private Object lock = new Object();
-    private NettyProviderClient nettyProviderClient = new NettyProviderClient();
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {

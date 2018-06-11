@@ -1,9 +1,5 @@
 package com.alibaba.dubbo.performance.demo.agent.netty.model;
 
-import com.alibaba.dubbo.performance.demo.agent.dubbo.model.RpcFuture;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.context.request.async.DeferredResult;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 

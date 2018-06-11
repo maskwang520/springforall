@@ -12,41 +12,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * HTTP请求参数解析器, 支持GET, POST
- * Created by whf on 12/23/15.
- */
 public class HttpParser {
 
     public static Map<String, String> parse(FullHttpRequest fullReq) throws IOException {
         HttpMethod method = fullReq.method();
 
-        Map<String, String> parmMap = new HashMap<>();
+        Map<String, String> paramMap = new HashMap<>();
 
         if (HttpMethod.GET == method) {
             // 是GET请求
             QueryStringDecoder decoder = new QueryStringDecoder(fullReq.uri());
-            decoder.parameters().entrySet().forEach(entry -> {
-                // entry.getValue()是一个List, 只取第一个元素
-                parmMap.put(entry.getKey(), entry.getValue().get(0));
-            });
+            decoder.parameters().forEach((key, value) -> paramMap.put(key, value.get(0)));
         } else if (HttpMethod.POST == method) {
             // 是POST请求
             HttpPostRequestDecoder decoder = new HttpPostRequestDecoder(fullReq);
             decoder.offer(fullReq);
 
-            List<InterfaceHttpData> parmList = decoder.getBodyHttpDatas();
+            List<InterfaceHttpData> paramList = decoder.getBodyHttpDatas();
 
-            for (InterfaceHttpData parm : parmList) {
-
-                Attribute data = (Attribute) parm;
-                parmMap.put(data.getName(), data.getValue());
+            for (InterfaceHttpData param : paramList) {
+                Attribute data = (Attribute) param;
+                paramMap.put(data.getName(), data.getValue());
             }
 
         } else {
             throw new RuntimeException("Unknown request method");
         }
 
-        return parmMap;
+        return paramMap;
     }
 }

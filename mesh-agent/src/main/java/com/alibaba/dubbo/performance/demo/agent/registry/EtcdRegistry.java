@@ -43,7 +43,6 @@ public class EtcdRegistry implements IRegistry {
             // 如果是provider，去etcd注册服务
             try {
                 int port = 19980;
-//                int port = Integer.valueOf(System.getProperty("server.port"));
                 register("com.alibaba.dubbo.performance.demo.provider.IHelloService", port);
             } catch (Exception e) {
                 e.printStackTrace();

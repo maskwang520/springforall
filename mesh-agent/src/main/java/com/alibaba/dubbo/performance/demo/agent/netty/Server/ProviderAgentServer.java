@@ -1,10 +1,8 @@
-package com.alibaba.dubbo.performance.demo.agent.netty.handler;
+package com.alibaba.dubbo.performance.demo.agent.netty.Server;
 
-import com.alibaba.dubbo.performance.demo.agent.HelloController;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.RpcClient;
 import com.alibaba.dubbo.performance.demo.agent.netty.model.HttpParser;
 import com.alibaba.dubbo.performance.demo.agent.netty.model.RequestWrapper;
-import com.alibaba.dubbo.performance.demo.agent.netty.model.ResponseWrapper;
 import com.alibaba.dubbo.performance.demo.agent.registry.RegistryInstance;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -19,12 +17,13 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static io.netty.handler.codec.http.HttpHeaderNames.*;
-import static io.netty.handler.codec.http.HttpResponseStatus.*;
-import static io.netty.handler.codec.http.HttpVersion.*;
+import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_LENGTH;
+import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
+import static io.netty.handler.codec.http.HttpResponseStatus.OK;
+import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
-public class FullMsgServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-    private Logger logger = LoggerFactory.getLogger(HelloController.class);
+public class ProviderAgentServer extends SimpleChannelInboundHandler<FullHttpRequest> {
+    private Logger logger = LoggerFactory.getLogger(ProviderAgentServer.class);
     private RpcClient rpcClient = new RpcClient(RegistryInstance.getInstance());
 
     @Override
@@ -43,7 +42,7 @@ public class FullMsgServerHandler extends SimpleChannelInboundHandler<FullHttpRe
             response.headers().set(CONTENT_TYPE, "text/plain");
             response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());
             ctx.write(response);
-            ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+            ctx.writeAndFlush(Unpooled.EMPTY_BUFFER);
         });
     }
 

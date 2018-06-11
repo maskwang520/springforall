@@ -48,7 +48,7 @@ public class RpcClient {
         request.setTwoWay(true);
         request.setData(invocation);
 
-//        logger.info("requestId=" + request.getId());
+        logger.info("requestId=" + request.getId());
 
         RpcFuture future = new RpcFuture(callback);
         RpcRequestHolder.put(String.valueOf(request.getId()),future);

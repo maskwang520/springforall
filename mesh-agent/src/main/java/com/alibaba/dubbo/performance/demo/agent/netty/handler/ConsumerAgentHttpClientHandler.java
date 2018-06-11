@@ -4,13 +4,13 @@ import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClientHandler extends ChannelInboundHandlerAdapter {
+public class ConsumerAgentHttpClientHandler extends ChannelInboundHandlerAdapter {
 
-    private Logger logger = LoggerFactory.getLogger(ClientHandler.class);
+    private Logger logger = LoggerFactory.getLogger(ConsumerAgentHttpClientHandler.class);
 
     private final Channel inboundChannel;
 
-    public ClientHandler(Channel inboundChannel) {
+    public ConsumerAgentHttpClientHandler(Channel inboundChannel) {
         this.inboundChannel = inboundChannel;
     }
 
@@ -33,13 +33,13 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        HttpServerHandler.closeOnFlush(inboundChannel);
+        ConsumerAgentHttpServerHandler.closeOnFlush(inboundChannel);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         cause.printStackTrace();
-        HttpServerHandler.closeOnFlush(ctx.channel());
+        ConsumerAgentHttpServerHandler.closeOnFlush(ctx.channel());
 
     }
 }
