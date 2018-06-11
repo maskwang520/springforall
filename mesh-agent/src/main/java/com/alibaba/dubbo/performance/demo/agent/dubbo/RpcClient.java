@@ -60,7 +60,10 @@ public class RpcClient {
         channel.writeAndFlush(request).addListener(new GenericFutureListener<Future<? super Void>>() {
             @Override
             public void operationComplete(Future<? super Void> future) throws Exception {
-                pool.release(channel);
+                if(future.isSuccess()) {
+                    pool.release(channel);
+                }
+
             }
         });
 
