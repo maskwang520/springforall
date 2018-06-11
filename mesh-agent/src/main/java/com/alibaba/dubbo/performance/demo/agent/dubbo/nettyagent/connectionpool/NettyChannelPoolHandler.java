@@ -1,7 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.connectionpool;
 
 import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.handler.ClientHandler;
-import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.handler.RequestEncoder;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.handler.ResponseDecoder;
 import io.netty.channel.Channel;
 import io.netty.channel.pool.ChannelPoolHandler;
@@ -28,7 +27,7 @@ public class NettyChannelPoolHandler implements ChannelPoolHandler {
         SocketChannel channel = (SocketChannel) ch;
         channel.config().setKeepAlive(true);
         channel.config().setTcpNoDelay(true);
-        channel.pipeline().addLast(new RequestEncoder())
+        channel.pipeline()
                 .addLast(new ResponseDecoder())
                 .addLast(new ClientHandler());
 

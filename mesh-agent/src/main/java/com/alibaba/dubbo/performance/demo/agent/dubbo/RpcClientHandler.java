@@ -26,8 +26,10 @@ public class RpcClientHandler extends SimpleChannelInboundHandler<RpcResponse> {
         byteBuf.writeInt(Integer.valueOf(response.getRequestId()));
         byteBuf.writeBytes(response.getBytes());
         //System.out.println(holder.getChannelContext(Integer.valueOf(requestId)).channel().remoteAddress().toString());
-        if(DubboChannelContextHolder.getChannelContext((Integer.valueOf(requestId)))!=null) {
-            DubboChannelContextHolder.getChannelContext(Integer.valueOf(requestId)).writeAndFlush(byteBuf).addListener(ChannelFutureListener.CLOSE);
+
+        ChannelHandlerContext handlerContext = DubboChannelContextHolder.getChannelContext((Integer.valueOf(requestId)));
+        if(handlerContext!=null) {
+            handlerContext.writeAndFlush(byteBuf).addListener(ChannelFutureListener.CLOSE);
             DubboChannelContextHolder.removeChannelContext(Integer.valueOf(requestId));
         }else{
             return;
