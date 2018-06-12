@@ -25,8 +25,6 @@ public class NettyPoolClient {
 
     public NettyPoolClient(){
         strap.group(group).channel(NioSocketChannel.class)
-                .option(ChannelOption.SO_KEEPALIVE, true)
-                .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT);
 
         poolMap = new AbstractChannelPoolMap<InetSocketAddress, SimpleChannelPool>() {

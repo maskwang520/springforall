@@ -23,9 +23,9 @@ public class ConsumerAgentChannel {
 
     private static Random random = new Random();
     private static List<Endpoint> endpoints = null;
-    private static NettyPoolClient client ;
+    private static NettyPoolClient client;
 
-    public static Channel getChannel(NettyPoolClient client1) throws Exception{
+    public static Channel getChannel(NettyPoolClient client1) throws Exception {
         client = client1;
         IRegistry registry = RegistrySingleton.getInstance();
 
@@ -39,13 +39,13 @@ public class ConsumerAgentChannel {
         }
 
         Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
-
+        //LOGGER.info("select:",endpoint.getHost(),endpoint.getPort());
         InetSocketAddress addr = new InetSocketAddress(endpoint.getHost(), endpoint.getPort());
         SimpleChannelPool pool = client.poolMap.get(addr);
         Channel channel = pool.acquire().get();
-        if(!ChannelPoolMap.contain(channel.remoteAddress().toString())){
-            ChannelPoolMap.put(channel.remoteAddress().toString(),pool);
-        }
+        //ChannelPoolMap.contain(channel.remoteAddress().toString())
+        ChannelPoolMap.put(channel.remoteAddress().toString(), pool);
+
         return channel;
     }
 }
