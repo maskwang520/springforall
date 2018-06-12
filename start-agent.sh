@@ -12,7 +12,7 @@ if [[ "$1" == "consumer" ]]; then
        -Xms1536M \
        -Xmx1536M \
        -Dtype=consumer \
-       -Dserver.port=20000 \
+       -Dserver.port=20001 \
        -Detcd.url=$ETCD_URL \
        -Dlogs.dir=/root/logs \
        /root/dists/mesh-agent.jar
