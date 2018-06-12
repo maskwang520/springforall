@@ -32,7 +32,7 @@ public class RpcClient {
 //        this.connectManager = new ConnecManager();
 //    }
 
-    public static void invoke(String interfaceName, String method, String parameterTypesString, String parameter) throws Exception {
+    public static void invoke(String interfaceName, String method, String parameterTypesString, String parameter,int requestId) throws Exception {
 
         Channel channel = pool.acquire().get();
 
@@ -53,6 +53,7 @@ public class RpcClient {
         request.setVersion("2.0.0");
         request.setTwoWay(true);
         request.setData(invocation);
+        request.setId(requestId);
 
         LOGGER.info("requestId=" + request.getId());
 

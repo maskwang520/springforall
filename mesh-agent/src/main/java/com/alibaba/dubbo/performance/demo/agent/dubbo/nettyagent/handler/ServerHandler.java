@@ -33,7 +33,7 @@ public class ServerHandler extends SimpleChannelInboundHandler {
         Map<String,List<String>> map = queryStringDecoder.parameters();
 
         //调用
-        rpcClient.invoke(map.get("interface").get(0), map.get("method").get(0), map.get("parameterTypesString").get(0), map.get("parameter").get(0));
+        rpcClient.invoke(map.get("interface").get(0), map.get("method").get(0), map.get("parameterTypesString").get(0), map.get("parameter").get(0),requestProtocol.getRequestId());
         //rpcClient.invoke(values[0], values[1], values[2], values[3]);
 
     }

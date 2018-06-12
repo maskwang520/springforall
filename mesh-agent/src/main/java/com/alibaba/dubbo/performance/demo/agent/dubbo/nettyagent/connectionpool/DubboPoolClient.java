@@ -25,7 +25,7 @@ public class DubboPoolClient {
         poolMap = new AbstractChannelPoolMap<InetSocketAddress, SimpleChannelPool>() {
             @Override
             protected SimpleChannelPool newPool(InetSocketAddress key) {
-                return new FixedChannelPool(strap.remoteAddress(key), new DubboChannelPoolHandler(),64);
+                return new FixedChannelPool(strap.remoteAddress(key), new DubboChannelPoolHandler(),128);
             }
         };
     }
