@@ -2,10 +2,10 @@ package com.alibaba.dubbo.performance.demo.agent.netty.handler;
 
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.RegistryInstance;
-import io.netty.bootstrap.Bootstrap;
+import com.alibaba.dubbo.performance.demo.agent.util.AgentConnectManager;
+import com.alibaba.dubbo.performance.demo.agent.util.ChannelMap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
-import io.netty.channel.socket.SocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +21,9 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
 
     private Channel outboundChannel;
 
-    private Logger logger = LoggerFactory.getLogger(ConsumerAgentHttpServerHandler.class);
+    private AgentConnectManager manager = new AgentConnectManager();
+
+    private static final Logger logger = LoggerFactory.getLogger(ConsumerAgentHttpServerHandler.class);
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -29,8 +31,8 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
             synchronized (lock) {
                 if (null == endpoints) {
                     endpoints = RegistryInstance.getInstance().find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
-                    endpoints.add(endpoints.get(1));
-                    endpoints.add(endpoints.get(2));
+//                    endpoints.add(endpoints.get(1));
+//                    endpoints.add(endpoints.get(2));
                 }
             }
         }
@@ -39,21 +41,22 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
         Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
         final Channel inboundChannel = ctx.channel();
         //
-        // Start the connection attempt.
-        Bootstrap b = new Bootstrap();
-        b.group(inboundChannel.eventLoop())
-                .channel(ctx.channel().getClass())
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
-//                        ch.pipeline().addLast(new LoggingHandler(LogLevel.INFO));
-                        ch.pipeline().addLast(new ConsumerAgentHttpClientHandler(inboundChannel));
-                    }
-                })
-                .option(ChannelOption.AUTO_READ, false);
-        ChannelFuture f = b.connect(endpoint.getHost(), endpoint.getPort());
-
+//        // Start the connection attempt.
+//        Bootstrap b = new Bootstrap();
+//        b.group(inboundChannel.eventLoop())
+//                .channel(ctx.channel().getClass())
+//                .handler(new ChannelInitializer<SocketChannel>() {
+//                    @Override
+//                    protected void initChannel(SocketChannel ch) throws Exception {
+////                        ch.pipeline().addLast(new LoggingHandler(LogLevel.INFO));
+//                        ch.pipeline().addLast(new ConsumerAgentHttpClientHandler(inboundChannel));
+//                    }
+//                })
+//                .option(ChannelOption.AUTO_READ, false);
+//        ChannelFuture f = b.connect(endpoint.getHost(), endpoint.getPort());
+        ChannelFuture f = manager.getChannel(endpoint.getHost(),endpoint.getPort());
         outboundChannel = f.channel();
+        ChannelMap.map.put("/"+endpoint.getHost()+":"+endpoint.getPort(),inboundChannel);
         f.addListener((ChannelFutureListener) future -> {
             if (future.isSuccess()) {
                 // connection complete start to read first data

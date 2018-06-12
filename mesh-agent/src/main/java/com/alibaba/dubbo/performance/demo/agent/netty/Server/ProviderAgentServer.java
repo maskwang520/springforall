@@ -5,7 +5,6 @@ import com.alibaba.dubbo.performance.demo.agent.netty.model.HttpParser;
 import com.alibaba.dubbo.performance.demo.agent.netty.model.RequestWrapper;
 import com.alibaba.dubbo.performance.demo.agent.registry.RegistryInstance;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -23,7 +22,7 @@ import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class ProviderAgentServer extends SimpleChannelInboundHandler<FullHttpRequest> {
-    private Logger logger = LoggerFactory.getLogger(ProviderAgentServer.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProviderAgentServer.class);
     private RpcClient rpcClient = new RpcClient(RegistryInstance.getInstance());
 
     @Override
