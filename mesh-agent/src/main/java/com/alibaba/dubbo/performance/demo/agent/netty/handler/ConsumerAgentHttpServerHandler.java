@@ -29,6 +29,8 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
             synchronized (lock) {
                 if (null == endpoints) {
                     endpoints = RegistryInstance.getInstance().find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
+                    endpoints.add(endpoints.get(1));
+                    endpoints.add(endpoints.get(2));
                 }
             }
         }
@@ -81,7 +83,7 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
                 if (future.isSuccess()) {
                     ctx.channel().read();
                 } else {
-                    //future.channel().close();
+                    future.channel().close();
                 }
             });
         }
