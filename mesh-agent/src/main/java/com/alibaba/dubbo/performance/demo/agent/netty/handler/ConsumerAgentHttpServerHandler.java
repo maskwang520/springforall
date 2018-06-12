@@ -46,7 +46,7 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
 
         // Start the connection attempt.
         Bootstrap b = new Bootstrap();
-        EventLoopGroup eventLoopGroup = new NioEventLoopGroup(8);
+        EventLoopGroup eventLoopGroup = new NioEventLoopGroup(4);
         b.group(eventLoopGroup )
                 .channel(NioSocketChannel.class)
                 .handler(new ChannelInitializer<SocketChannel>() {
