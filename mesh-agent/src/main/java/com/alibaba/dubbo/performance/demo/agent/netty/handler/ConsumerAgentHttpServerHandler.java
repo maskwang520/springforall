@@ -3,9 +3,12 @@ package com.alibaba.dubbo.performance.demo.agent.netty.handler;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.RegistryInstance;
 import com.alibaba.dubbo.performance.demo.agent.util.AgentConnectManager;
-import com.alibaba.dubbo.performance.demo.agent.util.ChannelMap;
+import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +34,8 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
             synchronized (lock) {
                 if (null == endpoints) {
                     endpoints = RegistryInstance.getInstance().find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
-//                    endpoints.add(endpoints.get(1));
-//                    endpoints.add(endpoints.get(2));
+                    endpoints.add(endpoints.get(1));
+                    endpoints.add(endpoints.get(2));
                 }
             }
         }
@@ -40,23 +43,24 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
         // 简单的负载均衡，随机取一个
         Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
         final Channel inboundChannel = ctx.channel();
-        //
-//        // Start the connection attempt.
-//        Bootstrap b = new Bootstrap();
-//        b.group(inboundChannel.eventLoop())
-//                .channel(ctx.channel().getClass())
-//                .handler(new ChannelInitializer<SocketChannel>() {
-//                    @Override
-//                    protected void initChannel(SocketChannel ch) throws Exception {
-////                        ch.pipeline().addLast(new LoggingHandler(LogLevel.INFO));
-//                        ch.pipeline().addLast(new ConsumerAgentHttpClientHandler(inboundChannel));
-//                    }
-//                })
-//                .option(ChannelOption.AUTO_READ, false);
-//        ChannelFuture f = b.connect(endpoint.getHost(), endpoint.getPort());
-        ChannelFuture f = manager.getChannel(endpoint.getHost(),endpoint.getPort());
+
+        // Start the connection attempt.
+        Bootstrap b = new Bootstrap();
+        EventLoopGroup eventLoopGroup = new NioEventLoopGroup(8);
+        b.group(eventLoopGroup )
+                .channel(NioSocketChannel.class)
+                .handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+//                        ch.pipeline().addLast(new LoggingHandler(LogLevel.INFO));
+                        ch.pipeline().addLast(new ConsumerAgentHttpClientHandler(inboundChannel));
+                    }
+                })
+                .option(ChannelOption.AUTO_READ, false);
+        ChannelFuture f = b.connect(endpoint.getHost(), endpoint.getPort());
+       // ChannelFuture f = manager.getChannel(endpoint.getHost(),endpoint.getPort());
         outboundChannel = f.channel();
-        ChannelMap.map.put("/"+endpoint.getHost()+":"+endpoint.getPort(),inboundChannel);
+       // ChannelMap.map.put("/"+endpoint.getHost()+":"+endpoint.getPort(),inboundChannel);
         f.addListener((ChannelFutureListener) future -> {
             if (future.isSuccess()) {
                 // connection complete start to read first data

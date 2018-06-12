@@ -1,7 +1,9 @@
 package com.alibaba.dubbo.performance.demo.agent.netty.handler;
 
-import com.alibaba.dubbo.performance.demo.agent.util.ChannelMap;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,13 +11,10 @@ public class ConsumerAgentHttpClientHandler extends ChannelInboundHandlerAdapter
 
     private static final Logger logger = LoggerFactory.getLogger(ConsumerAgentHttpClientHandler.class);
 
-    //private  Channel inboundChannel;
+    private final Channel inboundChannel;
 
-//    public ConsumerAgentHttpClientHandler(Channel inboundChannel) {
-//        this.inboundChannel = inboundChannel;
-//    }
-    public ConsumerAgentHttpClientHandler() {
-
+    public ConsumerAgentHttpClientHandler(Channel inboundChannel) {
+        this.inboundChannel = inboundChannel;
     }
 
     @Override
@@ -25,7 +24,7 @@ public class ConsumerAgentHttpClientHandler extends ChannelInboundHandlerAdapter
 
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
-        Channel inboundChannel = ChannelMap.map.get(ctx.channel().remoteAddress().toString());
+
         inboundChannel.writeAndFlush(msg).addListener((ChannelFutureListener) future -> {
             if (future.isSuccess()) {
                 ctx.channel().read();
@@ -37,7 +36,7 @@ public class ConsumerAgentHttpClientHandler extends ChannelInboundHandlerAdapter
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        Channel inboundChannel = ChannelMap.map.get(ctx.channel().remoteAddress().toString());
+
         ConsumerAgentHttpServerHandler.closeOnFlush(inboundChannel);
     }
 

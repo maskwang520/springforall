@@ -1,6 +1,5 @@
 package com.alibaba.dubbo.performance.demo.agent.util;
 
-import com.alibaba.dubbo.performance.demo.agent.netty.handler.ConsumerAgentHttpClientHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -57,7 +56,7 @@ public class AgentConnectManager {
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                .channel(NioSocketChannel.class)
-                .handler(new ConsumerAgentHttpClientHandler());
+                .channel(NioSocketChannel.class);
+//                .handler(new ConsumerAgentHttpClientHandler());
     }
 }
