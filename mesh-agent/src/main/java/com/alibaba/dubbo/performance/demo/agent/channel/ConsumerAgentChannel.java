@@ -33,8 +33,8 @@ public class ConsumerAgentChannel {
             synchronized (ConsumerAgentChannel.class) {
                 if (null == endpoints) {
                     endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
-//                    endpoints.add(endpoints.get(1));
-//                    endpoints.add(endpoints.get(2));
+                    endpoints.add(endpoints.get(1));
+                    endpoints.add(endpoints.get(2));
                     LOGGER.info("endpoint's size is{}", endpoints.size());
                 }
             }
