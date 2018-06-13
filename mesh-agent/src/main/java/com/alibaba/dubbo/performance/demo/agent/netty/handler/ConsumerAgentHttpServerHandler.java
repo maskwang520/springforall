@@ -51,7 +51,7 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
         // Start the connection attempt.
         Bootstrap b = new Bootstrap();
         EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
-        b.group(eventLoopGroup)
+        b.group(inboundChannel.eventLoop())
                 .channel(NioSocketChannel.class)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
@@ -89,6 +89,7 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+
         if (outboundChannel.isActive()) {
             outboundChannel.writeAndFlush(msg).addListener((ChannelFutureListener) future -> {
                 if (future.isSuccess()) {
