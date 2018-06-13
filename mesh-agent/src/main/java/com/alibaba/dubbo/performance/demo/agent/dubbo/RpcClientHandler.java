@@ -28,14 +28,16 @@ public class RpcClientHandler extends SimpleChannelInboundHandler<RpcResponse> {
         byteBuf.writeBytes(response.getBytes());
         //System.out.println(holder.getChannelContext(Integer.valueOf(requestId)).channel().remoteAddress().toString());
         ChannelHandlerContext handlerContext = DubboChannelContextHolder.getChannelContext((Integer.valueOf(requestId)));
-        handlerContext.writeAndFlush(byteBuf).addListener(new GenericFutureListener<Future<? super Void>>() {
-            @Override
-            public void operationComplete(Future<? super Void> future) throws Exception {
-                if(future.isSuccess()){
-                    DubboChannelContextHolder.removeChannelContext(Integer.valueOf(requestId));
+        if(handlerContext!=null) {
+            handlerContext.writeAndFlush(byteBuf).addListener(new GenericFutureListener<Future<? super Void>>() {
+                @Override
+                public void operationComplete(Future<? super Void> future) throws Exception {
+                    if (future.isSuccess()) {
+                        DubboChannelContextHolder.removeChannelContext(Integer.valueOf(requestId));
+                    }
                 }
-            }
-        });
+            });
+        }
 
 
     }

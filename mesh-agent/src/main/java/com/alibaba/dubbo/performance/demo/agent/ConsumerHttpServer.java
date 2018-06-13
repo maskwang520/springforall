@@ -2,7 +2,6 @@ package com.alibaba.dubbo.performance.demo.agent;
 
 import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.handler.NettyServerHandler;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -17,16 +16,16 @@ import io.netty.handler.codec.http.HttpResponseEncoder;
  */
 public class ConsumerHttpServer {
 
-    private EventLoopGroup group = new NioEventLoopGroup();
+    EventLoopGroup bossGroup = new NioEventLoopGroup();
+    EventLoopGroup workerGroup = new NioEventLoopGroup(4);
     private ServerBootstrap b = new ServerBootstrap();
 
-    public Channel getConsumerChannle(int port) throws InterruptedException {
+    public void getConsumerChannle(int port) throws InterruptedException {
         Channel channel = null;
         try {
-            b.group(group)
+            b.group(bossGroup,workerGroup)
                     .option(ChannelOption.SO_KEEPALIVE, true)
-                    .option(ChannelOption.TCP_NODELAY, true)
-                    .option(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT);
+                    .option(ChannelOption.TCP_NODELAY, true);
             b.channel(NioServerSocketChannel.class);
             b.childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override
@@ -46,9 +45,9 @@ public class ConsumerHttpServer {
             // 监听服务器关闭监听
 
         } finally {
-            group.shutdownGracefully(); //关闭EventLoopGroup，释放掉所有资源包括创建的线程
+            bossGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully(); //关闭EventLoopGroup，释放掉所有资源包括创建的线程
         }
 
-        return channel;
     }
 }
