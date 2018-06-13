@@ -1,9 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.netty.handler;
 
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +33,6 @@ public class ConsumerAgentHttpClientHandler extends ChannelInboundHandlerAdapter
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-
         ConsumerAgentHttpServerHandler.closeOnFlush(inboundChannel);
     }
 

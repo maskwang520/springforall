@@ -19,7 +19,7 @@ import java.net.InetSocketAddress;
 
 @Component
 public class NettyComponent implements ApplicationContextAware, InitializingBean {
-    private final static Logger LOGGER = LoggerFactory.getLogger(NettyComponent.class);
+    private  final static Logger LOGGER = LoggerFactory.getLogger(NettyComponent.class);
 
     private void consumerServerStart(int port) {
         EventLoopGroup bossGroup = new NioEventLoopGroup();

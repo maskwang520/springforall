@@ -5,9 +5,7 @@ import com.alibaba.dubbo.performance.demo.agent.registry.RegistryInstance;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,12 +45,11 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
         // 简单的负载均衡，随机取一个
         Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
         final Channel inboundChannel = ctx.channel();
-
+        //
         // Start the connection attempt.
         Bootstrap b = new Bootstrap();
-        EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
         b.group(inboundChannel.eventLoop())
-                .channel(NioSocketChannel.class)
+                .channel(ctx.channel().getClass())
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
@@ -62,9 +59,8 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
                 })
                 .option(ChannelOption.AUTO_READ, false);
         ChannelFuture f = b.connect(endpoint.getHost(), endpoint.getPort());
-       // ChannelFuture f = manager.getChannel(endpoint.getHost(),endpoint.getPort());
+
         outboundChannel = f.channel();
-       // ChannelMap.map.put("/"+endpoint.getHost()+":"+endpoint.getPort(),inboundChannel);
         f.addListener((ChannelFutureListener) future -> {
             if (future.isSuccess()) {
                 // connection complete start to read first data
@@ -89,7 +85,6 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-
         if (outboundChannel.isActive()) {
             outboundChannel.writeAndFlush(msg).addListener((ChannelFutureListener) future -> {
                 if (future.isSuccess()) {
