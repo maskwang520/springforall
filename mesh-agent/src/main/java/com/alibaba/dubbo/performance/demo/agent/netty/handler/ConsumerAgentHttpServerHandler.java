@@ -2,16 +2,17 @@ package com.alibaba.dubbo.performance.demo.agent.netty.handler;
 
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.RegistryInstance;
-import com.alibaba.dubbo.performance.demo.agent.util.AgentConnectManager;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.http.FullHttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -24,7 +25,6 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
 
     private Channel outboundChannel;
 
-    private AgentConnectManager manager = new AgentConnectManager();
 
     private static final Logger logger = LoggerFactory.getLogger(ConsumerAgentHttpServerHandler.class);
 
@@ -34,8 +34,13 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
             synchronized (lock) {
                 if (null == endpoints) {
                     endpoints = RegistryInstance.getInstance().find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
-                    endpoints.add(endpoints.get(1));
-                    endpoints.add(endpoints.get(2));
+                    Iterator<Endpoint> it = endpoints.iterator();
+                    while (it.hasNext()){
+                        Endpoint temp = it.next();
+                        if(temp.getSize()==2) {
+                            endpoints.add(temp);
+                        }
+                    }
                 }
             }
         }
@@ -46,8 +51,8 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
 
         // Start the connection attempt.
         Bootstrap b = new Bootstrap();
-        EventLoopGroup eventLoopGroup = new NioEventLoopGroup(4);
-        b.group(eventLoopGroup )
+        EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
+        b.group(eventLoopGroup)
                 .channel(NioSocketChannel.class)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
@@ -85,6 +90,8 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        FullHttpRequest fullHttpRequest = (FullHttpRequest)msg;
+
         if (outboundChannel.isActive()) {
             outboundChannel.writeAndFlush(msg).addListener((ChannelFutureListener) future -> {
                 if (future.isSuccess()) {
