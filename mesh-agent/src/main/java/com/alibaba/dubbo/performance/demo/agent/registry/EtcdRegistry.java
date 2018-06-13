@@ -56,7 +56,7 @@ public class EtcdRegistry implements IRegistry {
         // 服务注册的key为:    /dubbomesh/com.some.package.IHelloService/192.168.100.100:2000
         String strKey = MessageFormat.format("/{0}/{1}/{2}:{3}", rootPath, serviceName, IpHelper.getHostIp(), String.valueOf(port));
         ByteSequence key = ByteSequence.fromString(strKey);
-        ByteSequence val = ByteSequence.fromString("size");     // 目前只需要创建这个key,对应的value暂不使用,先留空
+        ByteSequence val = ByteSequence.fromString(size);     // 目前只需要创建这个key,对应的value暂不使用,先留空
         kv.put(key, val, PutOption.newBuilder().withLeaseId(leaseId).build()).get();
         logger.info("Register a new service at:" + strKey);
     }
