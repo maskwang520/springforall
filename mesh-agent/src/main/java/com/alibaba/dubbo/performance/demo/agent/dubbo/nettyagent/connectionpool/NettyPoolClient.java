@@ -1,5 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.connectionpool;
 
+import com.alibaba.dubbo.performance.demo.agent.ConsumerHttpServer;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.ChannelOption;
@@ -18,7 +19,7 @@ import java.net.InetSocketAddress;
  * 构建连接池
  */
 public class NettyPoolClient {
-    final EventLoopGroup group = new NioEventLoopGroup();
+    final EventLoopGroup group = ConsumerHttpServer.workerGroup;
     final Bootstrap strap = new Bootstrap();
 
     public  ChannelPoolMap<InetSocketAddress, SimpleChannelPool> poolMap;

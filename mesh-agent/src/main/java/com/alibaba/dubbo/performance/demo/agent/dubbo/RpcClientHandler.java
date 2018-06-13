@@ -19,21 +19,21 @@ public class RpcClientHandler extends SimpleChannelInboundHandler<RpcResponse> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, RpcResponse response) {
-        String requestId = response.getRequestId();
+        Integer requestId = Integer.valueOf(response.getRequestId());
         //获取持有的上一个ctx
 
-        ByteBuf byteBuf = Unpooled.directBuffer();
+        ByteBuf byteBuf = channelHandlerContext.channel().alloc().directBuffer();
         byteBuf.writeInt(response.getBytes().length + 4);
         byteBuf.writeInt(Integer.valueOf(response.getRequestId()));
         byteBuf.writeBytes(response.getBytes());
         //System.out.println(holder.getChannelContext(Integer.valueOf(requestId)).channel().remoteAddress().toString());
-        ChannelHandlerContext handlerContext = DubboChannelContextHolder.getChannelContext((Integer.valueOf(requestId)));
+        ChannelHandlerContext handlerContext = DubboChannelContextHolder.getChannelContext((requestId));
         if(handlerContext!=null) {
             handlerContext.writeAndFlush(byteBuf).addListener(new GenericFutureListener<Future<? super Void>>() {
                 @Override
                 public void operationComplete(Future<? super Void> future) throws Exception {
                     if (future.isSuccess()) {
-                        DubboChannelContextHolder.removeChannelContext(Integer.valueOf(requestId));
+                        DubboChannelContextHolder.removeChannelContext(requestId);
                     }
                 }
             });

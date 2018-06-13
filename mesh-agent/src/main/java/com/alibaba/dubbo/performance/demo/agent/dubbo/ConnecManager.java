@@ -1,5 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo;
 
+import com.alibaba.dubbo.performance.demo.agent.ServerConnector;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -9,7 +10,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
 public class ConnecManager {
-    private EventLoopGroup eventLoopGroup = new NioEventLoopGroup(4);
+    private EventLoopGroup eventLoopGroup = ServerConnector.workerGroup;
 
     private Bootstrap bootstrap;
 
