@@ -20,11 +20,10 @@ import java.net.InetSocketAddress;
  */
 public class ServerConnector {
 
-    public static EventLoopGroup workerGroup = new NioEventLoopGroup(8);
     private final static Logger LOGGER = LoggerFactory.getLogger(ServerConnector.class);
-
+    EventLoopGroup bossGroup = new NioEventLoopGroup();
+    EventLoopGroup workerGroup = new NioEventLoopGroup(4);
     public void connect(int port){
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
 
         try {
             ServerBootstrap sbs = new ServerBootstrap().group(bossGroup,workerGroup).channel(NioServerSocketChannel.class).localAddress(new InetSocketAddress(port))
@@ -36,7 +35,8 @@ public class ServerConnector {
                             ch.pipeline().addLast(new ServerHandler());
                         };
 
-                    }).option(ChannelOption.TCP_NODELAY, true)
+                    }).option(ChannelOption.SO_BACKLOG, 128)
+                    .option(ChannelOption.TCP_NODELAY, true)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
             LOGGER.info("server start");
             // 绑定端口，开始接收进来的连接

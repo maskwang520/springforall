@@ -21,7 +21,7 @@ public class AgentApp {
             LOGGER.info("start provider");
             new ServerConnector().connect(19980);
         } else {
-            new ConsumerHttpServer().getConsumerChannle(Integer.valueOf(20000));
+            new ConsumerHttpServer().getConsumerChannle(20000);
 
         }
 

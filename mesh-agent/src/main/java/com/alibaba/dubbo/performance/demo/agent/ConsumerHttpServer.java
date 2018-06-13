@@ -17,7 +17,7 @@ import io.netty.handler.codec.http.HttpResponseEncoder;
 public class ConsumerHttpServer {
 
     EventLoopGroup bossGroup = new NioEventLoopGroup();
-    public static EventLoopGroup workerGroup = new NioEventLoopGroup(8);
+    EventLoopGroup workerGroup = new NioEventLoopGroup(4);
     private ServerBootstrap b = new ServerBootstrap();
 
     public void getConsumerChannle(int port) throws InterruptedException {

@@ -22,7 +22,7 @@ public class RpcClientHandler extends SimpleChannelInboundHandler<RpcResponse> {
         Integer requestId = Integer.valueOf(response.getRequestId());
         //获取持有的上一个ctx
 
-        ByteBuf byteBuf = channelHandlerContext.channel().alloc().directBuffer();
+        ByteBuf byteBuf = Unpooled.directBuffer();
         byteBuf.writeInt(response.getBytes().length + 4);
         byteBuf.writeInt(Integer.valueOf(response.getRequestId()));
         byteBuf.writeBytes(response.getBytes());

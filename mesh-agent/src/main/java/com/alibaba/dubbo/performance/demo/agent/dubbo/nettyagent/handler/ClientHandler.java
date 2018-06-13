@@ -26,6 +26,7 @@ public class ClientHandler extends SimpleChannelInboundHandler {
         ChannelHandlerContext channelContext = ChannelContextHolder.getChannelContext((Integer.valueOf(agentRpcResponse.getRequestId())));
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(new String(agentRpcResponse.getBytes()), CharsetUtil.UTF_8));
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+        LOGGER.info("the return requestid is {}", agentRpcResponse.getRequestId());
 //        if(channelContext==null){
 //            LOGGER.info("channelcontext is null");
 //        }
