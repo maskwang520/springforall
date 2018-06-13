@@ -43,8 +43,10 @@ public class ServerConnector {
             ChannelFuture future = sbs.bind(port).sync();
             future.channel().closeFuture().sync();
         } catch (Exception e) {
-            bossGroup.shutdownGracefully();
+           e.printStackTrace();
+        }finally {
             workerGroup.shutdownGracefully();
+            bossGroup.shutdownGracefully();
         }
     }
 }
