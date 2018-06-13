@@ -8,12 +8,11 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.FullHttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Random;
 
 /**
@@ -34,11 +33,11 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
             synchronized (lock) {
                 if (null == endpoints) {
                     endpoints = RegistryInstance.getInstance().find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
-                    Iterator<Endpoint> it = endpoints.iterator();
+                    ListIterator<Endpoint> it = endpoints.listIterator();
                     while (it.hasNext()){
                         Endpoint temp = it.next();
                         if(temp.getSize()==2) {
-                            endpoints.add(temp);
+                            it.add(temp);
                         }
                     }
                 }
@@ -90,8 +89,6 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        FullHttpRequest fullHttpRequest = (FullHttpRequest)msg;
-
         if (outboundChannel.isActive()) {
             outboundChannel.writeAndFlush(msg).addListener((ChannelFutureListener) future -> {
                 if (future.isSuccess()) {

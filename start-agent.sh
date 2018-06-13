@@ -14,6 +14,9 @@ if [[ "$1" == "consumer" ]]; then
        -Dtype=consumer \
        -Dserver.port=20001 \
        -Detcd.url=$ETCD_URL \
+       -Dio.netty.leakDetectionLevel=disabled \
+       -Dio.netty.noJdkZlibDecoder=true \
+       -Dio.netty.allocator.pageSize=2048 \
        -Dlogs.dir=/root/logs \
        /root/dists/mesh-agent.jar
 elif [[ "$1" == "provider-small" ]]; then
@@ -25,6 +28,7 @@ elif [[ "$1" == "provider-small" ]]; then
        -Ddubbo.protocol.port=20880 \
        -Dserver.port=30000 \
        -Detcd.url=$ETCD_URL \
+       -Dsize=small \
        -Dlogs.dir=/root/logs \
        /root/dists/mesh-agent.jar
 elif [[ "$1" == "provider-medium" ]]; then
@@ -36,6 +40,7 @@ elif [[ "$1" == "provider-medium" ]]; then
        -Ddubbo.protocol.port=20880 \
        -Dserver.port=30000 \
        -Detcd.url=$ETCD_URL \
+       -Dsize=medium \
        -Dlogs.dir=/root/logs \
        /root/dists/mesh-agent.jar
 elif [[ "$1" == "provider-large" ]]; then
@@ -44,6 +49,7 @@ elif [[ "$1" == "provider-large" ]]; then
        -Xms2560M \
        -Xmx2560M \
        -Dtype=provider \
+       -Dsize=large \
        -Ddubbo.protocol.port=20880 \
        -Dserver.port=30000 \
        -Detcd.url=$ETCD_URL \
