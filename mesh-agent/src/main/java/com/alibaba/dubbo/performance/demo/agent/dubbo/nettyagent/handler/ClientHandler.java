@@ -1,7 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.handler;
 
 import com.alibaba.dubbo.performance.demo.agent.dubbo.model.RpcResponse;
-import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.connectionpool.NettyPoolClient;
 import com.alibaba.dubbo.performance.demo.agent.util.ChannelContextHolder;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -19,7 +18,6 @@ import org.slf4j.LoggerFactory;
 public class ClientHandler extends SimpleChannelInboundHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientHandler.class);
-    private static NettyPoolClient client = new NettyPoolClient();
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, Object msg) throws Exception {
@@ -33,8 +31,8 @@ public class ClientHandler extends SimpleChannelInboundHandler {
 //            LOGGER.info("channelcontext is null");
 //        }
         if(channelContext!=null) {
-            ChannelContextHolder.removeChannelContext((Integer.valueOf(agentRpcResponse.getRequestId())));
             channelContext.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+            ChannelContextHolder.removeChannelContext((Integer.valueOf(agentRpcResponse.getRequestId())));
         }
 
 

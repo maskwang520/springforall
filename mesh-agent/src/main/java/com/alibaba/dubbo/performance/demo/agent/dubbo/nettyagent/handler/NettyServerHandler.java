@@ -1,7 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.handler;
 
 import com.alibaba.dubbo.performance.demo.agent.channel.ConsumerAgentChannel;
-import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.connectionpool.NettyPoolClient;
 import com.alibaba.dubbo.performance.demo.agent.util.ChannelContextHolder;
 import com.alibaba.dubbo.performance.demo.agent.util.ChannelPoolMap;
 import io.netty.buffer.ByteBuf;
@@ -10,7 +9,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
@@ -27,8 +25,6 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyServerHandler.class);
     private static AtomicInteger count = new AtomicInteger(0);
 
-    private static NettyPoolClient client = new NettyPoolClient();
-
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
@@ -36,7 +32,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
         try {
             ByteBuf buf = httpRequest.content();    //获取参数
             ByteBuf byteBuf = Unpooled.directBuffer();
-            Channel channel = ConsumerAgentChannel.getChannel(client);
+            Channel channel = ConsumerAgentChannel.getChannel();
             int requestId = count.getAndIncrement();
 
             //LOGGER.info("THE INPUT ID IS {}", requestId);
@@ -66,16 +62,6 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    /**
-     * 获取body参数
-     *
-     * @param request
-     * @return
-     */
-    private String getBody(FullHttpRequest request) {
-        ByteBuf buf = request.content();
-        return buf.toString(CharsetUtil.UTF_8);
-    }
 
 
 }

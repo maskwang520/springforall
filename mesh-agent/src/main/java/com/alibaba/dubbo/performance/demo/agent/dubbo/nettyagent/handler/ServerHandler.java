@@ -20,7 +20,7 @@ public class ServerHandler extends SimpleChannelInboundHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerHandler.class);
 
-    private static RpcClient rpcClient = new RpcClient();
+    private RpcClient rpcClient = new RpcClient();
 
 
     @Override

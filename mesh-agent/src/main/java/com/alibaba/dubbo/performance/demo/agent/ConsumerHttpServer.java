@@ -17,8 +17,8 @@ import io.netty.handler.codec.http.HttpResponseEncoder;
  */
 public class ConsumerHttpServer {
 
-    private static EventLoopGroup group = new NioEventLoopGroup();
-    private static ServerBootstrap b = new ServerBootstrap();
+    private EventLoopGroup group = new NioEventLoopGroup();
+    private ServerBootstrap b = new ServerBootstrap();
 
     public Channel getConsumerChannle(int port) throws InterruptedException {
         Channel channel = null;
@@ -35,7 +35,7 @@ public class ConsumerHttpServer {
                     //处理http服务的关键handler
                     ph.addLast("encoder", new HttpResponseEncoder());
                     ph.addLast("decoder", new HttpRequestDecoder());
-                    ph.addLast("aggregator", new HttpObjectAggregator(10 * 1024 * 1024));
+                    ph.addLast("aggregator", new HttpObjectAggregator(512 * 1024));
                     ph.addLast("handler", new NettyServerHandler());// 服务端业务逻辑
                 }
             }); //设置过滤器

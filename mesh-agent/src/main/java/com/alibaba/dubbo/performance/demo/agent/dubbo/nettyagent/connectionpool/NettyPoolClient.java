@@ -18,10 +18,10 @@ import java.net.InetSocketAddress;
  * 构建连接池
  */
 public class NettyPoolClient {
-    final EventLoopGroup group = new NioEventLoopGroup(8);
+    final EventLoopGroup group = new NioEventLoopGroup();
     final Bootstrap strap = new Bootstrap();
 
-    public ChannelPoolMap<InetSocketAddress, SimpleChannelPool> poolMap;
+    public  ChannelPoolMap<InetSocketAddress, SimpleChannelPool> poolMap;
 
     public NettyPoolClient(){
         strap.group(group).channel(NioSocketChannel.class)

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Random;
 
 /**
@@ -23,23 +24,28 @@ public class ConsumerAgentChannel {
 
     private static Random random = new Random();
     private static List<Endpoint> endpoints = null;
-    private static NettyPoolClient client;
+    private static NettyPoolClient client = new NettyPoolClient();
 
-    public static Channel getChannel(NettyPoolClient client1) throws Exception {
-        client = client1;
+    public static Channel getChannel() throws Exception {
+
         IRegistry registry = RegistrySingleton.getInstance();
 
         if (null == endpoints) {
             synchronized (ConsumerAgentChannel.class) {
                 if (null == endpoints) {
                     endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
-                    endpoints.add(endpoints.get(1));
-                    endpoints.add(endpoints.get(2));
-                    LOGGER.info("endpoint's size is{}", endpoints.size());
+                    ListIterator<Endpoint> it = endpoints.listIterator();
+                    while (it.hasNext()){
+                        Endpoint temp = it.next();
+                        if(temp.getSize()==2) {
+                            it.add(temp);
+                        }
+                    }
                 }
             }
         }
 
+        // 简单的负载均衡，随机取一个
         Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
         //LOGGER.info("select:",endpoint.getHost(),endpoint.getPort());
         InetSocketAddress addr = new InetSocketAddress(endpoint.getHost(), endpoint.getPort());

@@ -3,8 +3,9 @@ package com.alibaba.dubbo.performance.demo.agent.registry;
 public class Endpoint {
     private final String host;
     private final int port;
+    private int size;
 
-    public Endpoint(String host,int port){
+    public Endpoint(String host,int port,int size){
         this.host = host;
         this.port = port;
     }
@@ -15,6 +16,10 @@ public class Endpoint {
 
     public int getPort() {
         return port;
+    }
+
+    public int getSize() {
+        return size;
     }
 
     public String toString(){
