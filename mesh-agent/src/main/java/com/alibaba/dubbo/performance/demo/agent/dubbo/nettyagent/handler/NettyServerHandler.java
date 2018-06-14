@@ -1,6 +1,5 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.handler;
 
-import com.alibaba.dubbo.performance.demo.agent.channel.ConsumerAgentChannel;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.connectionpool.AgentClientPool;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.modle.RegistrySingleton;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
@@ -44,7 +43,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler {
             ByteBuf byteBuf = Unpooled.directBuffer();
 
             if (null == endpoints) {
-                synchronized (ConsumerAgentChannel.class) {
+                synchronized (NettyServerHandler.class) {
                     if (null == endpoints) {
                         endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
                         ListIterator<Endpoint> it = endpoints.listIterator();
