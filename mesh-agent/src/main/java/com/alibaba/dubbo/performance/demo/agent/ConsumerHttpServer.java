@@ -17,13 +17,17 @@ import io.netty.handler.codec.http.HttpResponseEncoder;
 public class ConsumerHttpServer {
 
     EventLoopGroup bossGroup = new NioEventLoopGroup();
-    EventLoopGroup workerGroup = new NioEventLoopGroup(12);
     private ServerBootstrap b = new ServerBootstrap();
+    private EventLoopGroup group;
+
+    public ConsumerHttpServer(EventLoopGroup group){
+        this.group = group;
+    }
 
     public void getConsumerChannle(int port) throws InterruptedException {
         Channel channel = null;
         try {
-            b.group(bossGroup,workerGroup)
+            b.group(bossGroup,group)
                     .option(ChannelOption.SO_KEEPALIVE, true)
                     .option(ChannelOption.TCP_NODELAY, true);
             b.channel(NioServerSocketChannel.class);
@@ -46,7 +50,7 @@ public class ConsumerHttpServer {
 
         } finally {
             bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully(); //关闭EventLoopGroup，释放掉所有资源包括创建的线程
+            group.shutdownGracefully(); //关闭EventLoopGroup，释放掉所有资源包括创建的线程
         }
 
     }

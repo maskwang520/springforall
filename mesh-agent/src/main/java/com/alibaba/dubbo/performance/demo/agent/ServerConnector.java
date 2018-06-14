@@ -21,19 +21,26 @@ import java.net.InetSocketAddress;
 public class ServerConnector {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ServerConnector.class);
+    private EventLoopGroup group;
 
-    public void connect(int port){
+    public ServerConnector(EventLoopGroup group) {
+        this.group = group;
+    }
+
+    public void connect(int port) {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
-        EventLoopGroup workerGroup = new NioEventLoopGroup(12);
+
         try {
-            ServerBootstrap sbs = new ServerBootstrap().group(bossGroup,workerGroup).channel(NioServerSocketChannel.class).localAddress(new InetSocketAddress(port))
+            ServerBootstrap sbs = new ServerBootstrap().group(bossGroup, group).channel(NioServerSocketChannel.class).localAddress(new InetSocketAddress(port))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
 
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ch.pipeline().addLast(new RequestDecoder());
-                           // ch.pipeline().addLast(new ResponseEncoder());
+                            // ch.pipeline().addLast(new ResponseEncoder());
                             ch.pipeline().addLast(new ServerHandler());
-                        };
+                        }
+
+                        ;
                     })
                     .option(ChannelOption.TCP_NODELAY, true)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
@@ -42,9 +49,9 @@ public class ServerConnector {
             ChannelFuture future = sbs.bind(port).sync();
             future.channel().closeFuture().sync();
         } catch (Exception e) {
-           e.printStackTrace();
-        }finally {
-            workerGroup.shutdownGracefully();
+            e.printStackTrace();
+        } finally {
+            group.shutdownGracefully();
             bossGroup.shutdownGracefully();
         }
     }

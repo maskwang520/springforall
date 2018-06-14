@@ -2,60 +2,53 @@ package com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.connectionpool
 
 import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.handler.ClientHandler;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.handler.ResponseDecoder;
+import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.UnpooledByteBufAllocator;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Random;
+
 
 /**
  * Created by maskwang on 18-6-14.
  */
 public class AgentClientPool {
-    private static EventLoopGroup eventLoopGroup = new NioEventLoopGroup(4);
-    private static Bootstrap bootstrap;
-    static List<Channel> channels = new ArrayList<>();
-    static AtomicInteger count = new AtomicInteger(0);
 
-    public Channel getChannel(String host, Integer port, EventLoopGroup workGroup) {
-        //eventLoopGroup = workGroup;
-        if (null == bootstrap) {
-            synchronized (AgentClientPool.class) {
-                if (null == bootstrap) {
-                    initBootstrap();
-                }
-            }
+    private EventLoopGroup eventLoopGroup ;
+    private Random random = new Random();
+    private EventLoopMap eventLoopMap = new EventLoopMap();
+
+    public void putClientPool(List<Endpoint> endpoints, EventLoopGroup eventLoopGroup) {
+        this.eventLoopGroup = eventLoopGroup;
+        EventLoop loop = eventLoopGroup.next();
+        while (loop != null) {
+            Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
+            eventLoopMap.put(loop, initChannel(endpoint.getHost(),endpoint.getPort()));
+            loop = loop.next();
         }
-        if (channels.size() < 12) {
-            synchronized (AgentClientPool.class) {
-                if (channels.size() < 12) {
-                    try {
-                        channels.add(bootstrap.connect(host, port).sync().channel());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-
-        return channels.get(count.getAndIncrement() % channels.size());
-
     }
 
-    public void initBootstrap() {
+    public void putServerPool(EventLoopGroup eventLoopGroup) {
+        this.eventLoopGroup = eventLoopGroup;
+        EventLoop loop = eventLoopGroup.next();
+        while (loop != null) {
+            eventLoopMap.put(loop, initChannel("127.0.0.1",Integer.valueOf(System.getProperty("dubbo.protocol.port"))));
+            loop = loop.next();
+        }
+    }
 
-        bootstrap = new Bootstrap()
+    public Channel initChannel(String host, Integer port) {
+        Channel channel = null;
+        Bootstrap bootstrap = new Bootstrap()
                 .group(eventLoopGroup)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
-                .option(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT)
+                .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                 .channel(NioSocketChannel.class)
                 .handler(new ChannelInitializer() {
                     @Override
@@ -65,6 +58,12 @@ public class AgentClientPool {
                                 .addLast(new ClientHandler());
                     }
                 });
+        try {
+            channel = bootstrap.connect(host, port).sync().channel();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return channel;
     }
 
 

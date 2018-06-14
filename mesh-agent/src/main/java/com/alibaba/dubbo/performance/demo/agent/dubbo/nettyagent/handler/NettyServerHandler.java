@@ -1,6 +1,7 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.handler;
 
 import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.connectionpool.AgentClientPool;
+import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.connectionpool.EventLoopMap;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.modle.RegistrySingleton;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
@@ -25,13 +26,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class NettyServerHandler extends SimpleChannelInboundHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NettyServerHandler.class);
     private static AtomicInteger count = new AtomicInteger(0);
+    private EventLoopMap eventLoopMap = new EventLoopMap();
 
-    private AgentClientPool agentClientPool = new AgentClientPool();
-    private  Random random = new Random();
-    private static List<Endpoint> endpoints = null;
-    IRegistry registry = RegistrySingleton.getInstance();
 
 
     @Override
@@ -42,24 +39,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler {
             ByteBuf buf = httpRequest.content();    //获取参数
             ByteBuf byteBuf = Unpooled.directBuffer();
 
-            if (null == endpoints) {
-                synchronized (NettyServerHandler.class) {
-                    if (null == endpoints) {
-                        endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
-                        ListIterator<Endpoint> it = endpoints.listIterator();
-                        while (it.hasNext()) {
-                            Endpoint temp = it.next();
-                            if (temp.getSize() == 2) {
-                                it.add(temp);
-                            }
-                        }
-                    }
-                }
-            }
 
-            // 简单的负载均衡，随机取一个
-            Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
-            Channel channel = agentClientPool.getChannel(endpoint.getHost(),endpoint.getPort(),ctx.channel().eventLoop());
+            Channel channel = eventLoopMap.get(ctx.channel().eventLoop());
             int requestId = count.getAndIncrement();
 
             //LOGGER.info("THE INPUT ID IS {}", requestId);
