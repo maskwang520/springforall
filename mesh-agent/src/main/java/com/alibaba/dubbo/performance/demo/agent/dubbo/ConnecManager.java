@@ -19,7 +19,8 @@ public class ConnecManager {
     public ConnecManager() {
     }
 
-    public Channel getChannel() throws Exception {
+    public Channel getChannel(EventLoopGroup group) throws Exception {
+        //this.eventLoopGroup = group;
         if (null != channel) {
             return channel;
         }

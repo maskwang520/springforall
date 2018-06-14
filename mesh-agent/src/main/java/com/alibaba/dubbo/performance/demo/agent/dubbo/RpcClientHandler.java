@@ -19,7 +19,6 @@ public class RpcClientHandler extends SimpleChannelInboundHandler<RpcResponse> {
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, RpcResponse response) {
         String requestId = response.getRequestId();
-
         ByteBuf byteBuf = Unpooled.directBuffer();
         byteBuf.writeInt(response.getBytes().length + 4);
         byteBuf.writeInt(Integer.valueOf(response.getRequestId()));
@@ -29,8 +28,6 @@ public class RpcClientHandler extends SimpleChannelInboundHandler<RpcResponse> {
             RpcRequestHolder.remove(requestId);
             future.done(byteBuf);
         }
-
-
     }
 
 }

@@ -2,6 +2,7 @@ package com.alibaba.dubbo.performance.demo.agent.dubbo;
 
 import com.alibaba.dubbo.performance.demo.agent.dubbo.model.*;
 import io.netty.channel.Channel;
+import io.netty.channel.EventLoopGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +25,9 @@ public class RpcClient {
 //        this.connectManager = new ConnecManager();
 //    }
 
-    public void invoke(String interfaceName, String method, String parameterTypesString, String parameter,int requestId,Consumer callback) throws Exception {
+    public void invoke(String interfaceName, String method, String parameterTypesString, String parameter,int requestId,Consumer callback,EventLoopGroup eventLoopGroup) throws Exception {
 
-        Channel channel = connecManager.getChannel();
+        Channel channel = connecManager.getChannel(eventLoopGroup);
 
         //Channel channel = connectManager.getChannel();
 

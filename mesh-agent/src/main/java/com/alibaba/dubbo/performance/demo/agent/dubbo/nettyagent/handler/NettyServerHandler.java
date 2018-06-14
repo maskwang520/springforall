@@ -1,39 +1,66 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.handler;
 
 import com.alibaba.dubbo.performance.demo.agent.channel.ConsumerAgentChannel;
+import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.connectionpool.AgentClientPool;
+import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.modle.RegistrySingleton;
+import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
+import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
 import com.alibaba.dubbo.performance.demo.agent.util.ChannelContextHolder;
-import com.alibaba.dubbo.performance.demo.agent.util.ChannelPoolMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.util.ReferenceCountUtil;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by maskwang on 18-6-9.
  */
-public class NettyServerHandler extends ChannelInboundHandlerAdapter {
+public class NettyServerHandler extends SimpleChannelInboundHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyServerHandler.class);
     private static AtomicInteger count = new AtomicInteger(0);
 
+    private AgentClientPool agentClientPool = new AgentClientPool();
+    private  Random random = new Random();
+    private static List<Endpoint> endpoints = null;
+    IRegistry registry = RegistrySingleton.getInstance();
+
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
 
         FullHttpRequest httpRequest = (FullHttpRequest) msg;
         try {
             ByteBuf buf = httpRequest.content();    //获取参数
             ByteBuf byteBuf = Unpooled.directBuffer();
-            Channel channel = ConsumerAgentChannel.getChannel();
+
+            if (null == endpoints) {
+                synchronized (ConsumerAgentChannel.class) {
+                    if (null == endpoints) {
+                        endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
+                        ListIterator<Endpoint> it = endpoints.listIterator();
+                        while (it.hasNext()) {
+                            Endpoint temp = it.next();
+                            if (temp.getSize() == 2) {
+                                it.add(temp);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 简单的负载均衡，随机取一个
+            Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
+            Channel channel = agentClientPool.getChannel(endpoint.getHost(),endpoint.getPort(),ctx.channel().eventLoop());
             int requestId = count.getAndIncrement();
 
             //LOGGER.info("THE INPUT ID IS {}", requestId);
@@ -42,23 +69,10 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
             byteBuf.writeInt(requestId);
             byteBuf.writeBytes(buf);
             ReferenceCountUtil.retain(buf);
-            //释放有问题
-            channel.writeAndFlush(byteBuf).addListener(new GenericFutureListener<Future<? super Void>>() {
-                @Override
-                public void operationComplete(Future<? super Void> future) throws Exception {
-                    if(future.isSuccess()) {
-                        ChannelPoolMap.get(channel.remoteAddress().toString()).release(channel);
-                    }
-                }
-            });
-//            String []hosts = channel.remoteAddress().toString().split(":");
-//            client.poolMap.get(new InetSocketAddress(hosts[0].substring(1,hosts[0].length()),Integer.valueOf(hosts[1]))).release(channel);
 
+            channel.writeAndFlush(byteBuf);
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            //释放请求
-            httpRequest.release();
         }
     }
 
