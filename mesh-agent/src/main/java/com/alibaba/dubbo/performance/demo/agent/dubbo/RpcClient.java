@@ -1,8 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo;
 
-import com.alibaba.dubbo.performance.demo.agent.dubbo.model.JsonUtils;
-import com.alibaba.dubbo.performance.demo.agent.dubbo.model.Request;
-import com.alibaba.dubbo.performance.demo.agent.dubbo.model.RpcInvocation;
+import com.alibaba.dubbo.performance.demo.agent.dubbo.model.*;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.function.Consumer;
 
 public class RpcClient {
 
@@ -25,7 +24,7 @@ public class RpcClient {
 //        this.connectManager = new ConnecManager();
 //    }
 
-    public void invoke(String interfaceName, String method, String parameterTypesString, String parameter,int requestId) throws Exception {
+    public void invoke(String interfaceName, String method, String parameterTypesString, String parameter,int requestId,Consumer callback) throws Exception {
 
         Channel channel = connecManager.getChannel();
 
@@ -47,9 +46,9 @@ public class RpcClient {
         request.setTwoWay(true);
         request.setData(invocation);
         request.setId(requestId);
-
+        RpcFuture future = new RpcFuture(callback);
+        RpcRequestHolder.put(String.valueOf(request.getId()),future);
         LOGGER.info("requestId=" + request.getId());
-
         channel.writeAndFlush(request);
 
     }

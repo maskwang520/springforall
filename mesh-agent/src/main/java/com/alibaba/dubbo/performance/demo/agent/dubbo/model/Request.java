@@ -1,8 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo.model;
 
 
-import java.util.concurrent.atomic.AtomicLong;
-
 public class Request {
 
     private long id;
@@ -16,6 +14,7 @@ public class Request {
     private boolean event = false;
 
     private Object mData;
+
 
     public long getId() {
         return id;

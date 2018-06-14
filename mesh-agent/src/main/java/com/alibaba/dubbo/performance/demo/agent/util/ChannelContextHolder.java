@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ChannelContextHolder {
 
-    private static ConcurrentHashMap<Integer,ChannelHandlerContext> channelMap = new ConcurrentHashMap<>(1024);
+    private static ConcurrentHashMap<Integer,ChannelHandlerContext> channelMap = new ConcurrentHashMap<>(64);
 
     public static ChannelHandlerContext getChannelContext(Integer requestId){
         return channelMap.get(requestId);

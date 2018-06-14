@@ -1,7 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.handler;
 
 import com.alibaba.dubbo.performance.demo.agent.dubbo.RpcClient;
-import com.alibaba.dubbo.performance.demo.agent.util.DubboChannelContextHolder;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.modle.RequestProtocol;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -27,13 +26,15 @@ public class ServerHandler extends SimpleChannelInboundHandler {
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         RequestProtocol requestProtocol = (RequestProtocol) msg;
 
-        DubboChannelContextHolder.putChannelContext(requestProtocol.getRequestId(), ctx);
-
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder("?"+new String(requestProtocol.getContent()));
         Map<String,List<String>> map = queryStringDecoder.parameters();
 
         //调用
-        rpcClient.invoke(map.get("interface").get(0), map.get("method").get(0), map.get("parameterTypesString").get(0), map.get("parameter").get(0),requestProtocol.getRequestId());
+        rpcClient.invoke(map.get("interface").get(0), map.get("method").get(0), map.get("parameterTypesString").get(0), map.get("parameter").get(0),requestProtocol.getRequestId(),
+                (result)->{
+                    ctx.writeAndFlush(result);
+                }
+        );
         //rpcClient.invoke(values[0], values[1], values[2], values[3]);
 
     }

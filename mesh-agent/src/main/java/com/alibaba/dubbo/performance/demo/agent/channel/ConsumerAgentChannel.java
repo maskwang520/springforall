@@ -35,9 +35,9 @@ public class ConsumerAgentChannel {
                 if (null == endpoints) {
                     endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
                     ListIterator<Endpoint> it = endpoints.listIterator();
-                    while (it.hasNext()){
+                    while (it.hasNext()) {
                         Endpoint temp = it.next();
-                        if(temp.getSize()==2) {
+                        if (temp.getSize() == 2) {
                             it.add(temp);
                         }
                     }

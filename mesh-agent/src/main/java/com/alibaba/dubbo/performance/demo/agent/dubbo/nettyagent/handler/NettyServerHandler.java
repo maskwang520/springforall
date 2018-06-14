@@ -25,6 +25,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyServerHandler.class);
     private static AtomicInteger count = new AtomicInteger(0);
 
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
@@ -48,7 +49,6 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
                     if(future.isSuccess()) {
                         ChannelPoolMap.get(channel.remoteAddress().toString()).release(channel);
                     }
-
                 }
             });
 //            String []hosts = channel.remoteAddress().toString().split(":");

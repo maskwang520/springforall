@@ -21,10 +21,10 @@ import java.net.InetSocketAddress;
 public class ServerConnector {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ServerConnector.class);
-    EventLoopGroup bossGroup = new NioEventLoopGroup();
-    EventLoopGroup workerGroup = new NioEventLoopGroup(4);
-    public void connect(int port){
 
+    public void connect(int port){
+        EventLoopGroup bossGroup = new NioEventLoopGroup();
+        EventLoopGroup workerGroup = new NioEventLoopGroup(4);
         try {
             ServerBootstrap sbs = new ServerBootstrap().group(bossGroup,workerGroup).channel(NioServerSocketChannel.class).localAddress(new InetSocketAddress(port))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
@@ -34,8 +34,7 @@ public class ServerConnector {
                            // ch.pipeline().addLast(new ResponseEncoder());
                             ch.pipeline().addLast(new ServerHandler());
                         };
-
-                    }).option(ChannelOption.SO_BACKLOG, 128)
+                    })
                     .option(ChannelOption.TCP_NODELAY, true)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
             LOGGER.info("server start");
