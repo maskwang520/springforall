@@ -1,12 +1,11 @@
 package com.alibaba.dubbo.performance.demo.agent.netty.handler;
 
-import io.netty.channel.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 
 public class ConsumerAgentHttpClientHandler extends ChannelInboundHandlerAdapter {
-
-    private static final Logger logger = LoggerFactory.getLogger(ConsumerAgentHttpClientHandler.class);
 
     private final Channel inboundChannel;
 

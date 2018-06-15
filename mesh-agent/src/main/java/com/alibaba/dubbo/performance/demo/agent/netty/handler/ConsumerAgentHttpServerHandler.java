@@ -19,13 +19,13 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
     private static List<Endpoint> endpoints = null;
 
     private Channel outboundChannel;
-    private Object lock = new Object();
+
     private static AtomicInteger count = new AtomicInteger(0);
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         if (null == endpoints) {
-            synchronized (lock) {
+            synchronized (ConsumerAgentHttpServerHandler.class) {
                 if (null == endpoints) {
                     endpoints = RegistryInstance.getInstance().find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
                     ListIterator<Endpoint> it = endpoints.listIterator();
@@ -43,7 +43,6 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
             count.set(0);
             id=4;
         }
-        System.out.println(id);
         // 简单的负载均衡，随机取一个
         Endpoint endpoint = endpoints.get(id);
 
@@ -89,6 +88,7 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (outboundChannel.isActive()) {
+            outboundChannel.write(1);
             outboundChannel.writeAndFlush(msg).addListener((ChannelFutureListener) future -> {
                 if (future.isSuccess()) {
                     ctx.channel().read();

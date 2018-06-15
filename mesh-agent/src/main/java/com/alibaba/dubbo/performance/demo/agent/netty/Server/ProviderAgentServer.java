@@ -10,8 +10,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -22,7 +20,6 @@ import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class ProviderAgentServer extends SimpleChannelInboundHandler<FullHttpRequest> {
-    private static final Logger logger = LoggerFactory.getLogger(ProviderAgentServer.class);
     private RpcClient rpcClient = new RpcClient();
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
