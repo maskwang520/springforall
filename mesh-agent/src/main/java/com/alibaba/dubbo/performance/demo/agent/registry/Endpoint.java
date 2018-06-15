@@ -8,6 +8,7 @@ public class Endpoint {
     public Endpoint(String host,int port,int size){
         this.host = host;
         this.port = port;
+        this.size = size;
     }
 
     public String getHost() {

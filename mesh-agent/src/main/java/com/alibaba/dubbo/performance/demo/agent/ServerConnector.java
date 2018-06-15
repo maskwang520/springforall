@@ -17,30 +17,23 @@ import java.net.InetSocketAddress;
 
 /**
  * Created by maskwang on 18-6-3.
+ * pa的server 启动
  */
 public class ServerConnector {
-
+    static EventLoopGroup bossGroup = new NioEventLoopGroup();
+    static EventLoopGroup workerGroup = new NioEventLoopGroup(4);
     private final static Logger LOGGER = LoggerFactory.getLogger(ServerConnector.class);
-    private EventLoopGroup group;
-
-    public ServerConnector(EventLoopGroup group) {
-        this.group = group;
-    }
 
     public void connect(int port) {
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
-
         try {
-            ServerBootstrap sbs = new ServerBootstrap().group(bossGroup, group).channel(NioServerSocketChannel.class).localAddress(new InetSocketAddress(port))
+            ServerBootstrap sbs = new ServerBootstrap().group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).localAddress(new InetSocketAddress(port))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
-
+                        @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ch.pipeline().addLast(new RequestDecoder());
-                            // ch.pipeline().addLast(new ResponseEncoder());
                             ch.pipeline().addLast(new ServerHandler());
                         }
 
-                        ;
                     })
                     .option(ChannelOption.TCP_NODELAY, true)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
@@ -51,7 +44,7 @@ public class ServerConnector {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            group.shutdownGracefully();
+            workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
         }
     }

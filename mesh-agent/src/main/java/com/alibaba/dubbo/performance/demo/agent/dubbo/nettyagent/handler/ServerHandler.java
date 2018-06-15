@@ -25,17 +25,15 @@ public class ServerHandler extends SimpleChannelInboundHandler {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         RequestProtocol requestProtocol = (RequestProtocol) msg;
-
+        //获取参数
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder("?"+new String(requestProtocol.getContent()));
         Map<String,List<String>> map = queryStringDecoder.parameters();
-
-        //调用
+        //调用dubbo client
         rpcClient.invoke(map.get("interface").get(0), map.get("method").get(0), map.get("parameterTypesString").get(0), map.get("parameter").get(0),requestProtocol.getRequestId(),
                 (result)->{
                     ctx.writeAndFlush(result);
                 }
         ,ctx.channel().eventLoop());
-        //rpcClient.invoke(values[0], values[1], values[2], values[3]);
 
     }
 }

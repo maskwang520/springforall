@@ -17,19 +17,13 @@ import io.netty.handler.codec.http.HttpResponseEncoder;
 public class ConsumerHttpServer {
 
     EventLoopGroup bossGroup = new NioEventLoopGroup();
+    EventLoopGroup workerGroup = new NioEventLoopGroup(8);
     private ServerBootstrap b = new ServerBootstrap();
-    private EventLoopGroup group;
-
-    public ConsumerHttpServer(EventLoopGroup group){
-        this.group = group;
-    }
 
     public void getConsumerChannle(int port) throws InterruptedException {
         Channel channel = null;
         try {
-            b.group(bossGroup,group)
-                    .option(ChannelOption.SO_KEEPALIVE, true)
-                    .option(ChannelOption.TCP_NODELAY, true);
+            b.group(bossGroup, workerGroup);
             b.channel(NioServerSocketChannel.class);
             b.childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override
@@ -41,16 +35,15 @@ public class ConsumerHttpServer {
                     ph.addLast("aggregator", new HttpObjectAggregator(512 * 1024));
                     ph.addLast("handler", new NettyServerHandler());// 服务端业务逻辑
                 }
-            }); //设置过滤器
-            // 服务器绑定端口监听
+            });
             channel = b.bind(port).sync().channel();
-            //System.out.println("服务端启动成功,端口是:" + port);
             channel.closeFuture().sync();
-            // 监听服务器关闭监听
 
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             bossGroup.shutdownGracefully();
-            group.shutdownGracefully(); //关闭EventLoopGroup，释放掉所有资源包括创建的线程
+            workerGroup.shutdownGracefully(); //关闭EventLoopGroup，释放掉所有资源包括创建的线程
         }
 
     }

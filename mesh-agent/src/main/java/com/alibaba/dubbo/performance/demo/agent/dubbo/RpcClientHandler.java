@@ -24,7 +24,7 @@ public class RpcClientHandler extends SimpleChannelInboundHandler<RpcResponse> {
         byteBuf.writeInt(Integer.valueOf(response.getRequestId()));
         byteBuf.writeBytes(response.getBytes());
         RpcFuture future = RpcRequestHolder.get(requestId);
-        if(null != future){
+        if (null != future) {
             RpcRequestHolder.remove(requestId);
             future.done(byteBuf);
         }
