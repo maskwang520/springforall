@@ -23,7 +23,7 @@ public class NettyComponent implements ApplicationContextAware, InitializingBean
 
     private void consumerServerStart(int port) {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
-        EventLoopGroup workerGroup = new NioEventLoopGroup(7);
+        EventLoopGroup workerGroup = new NioEventLoopGroup(6);
         try {
             ServerBootstrap b = new ServerBootstrap().group(bossGroup, workerGroup);
             b.channel(NioServerSocketChannel.class)
