@@ -23,6 +23,7 @@ elif [[ "$1" == "provider-small" ]]; then
        -Xmx512M \
        -Dtype=provider \
        -Ddubbo.protocol.port=20880 \
+       -Dio.netty.leakDetectionLevel=disabled \
        -Dserver.port=30000 \
        -Detcd.url=$ETCD_URL \
        -Dsize=small \

@@ -88,7 +88,6 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (outboundChannel.isActive()) {
-            outboundChannel.write(1);
             outboundChannel.writeAndFlush(msg).addListener((ChannelFutureListener) future -> {
                 if (future.isSuccess()) {
                     ctx.channel().read();
