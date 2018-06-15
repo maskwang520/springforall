@@ -6,7 +6,6 @@ import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.util.ChannelContextHolder;
 import com.alibaba.dubbo.performance.demo.agent.util.EventLoopMap;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.EventLoop;
@@ -38,10 +37,10 @@ public class NettyServerHandler extends SimpleChannelInboundHandler {
         FullHttpRequest httpRequest = (FullHttpRequest) msg;
         try {
             ByteBuf buf = httpRequest.content();    //获取参数
-            ByteBuf byteBuf = Unpooled.directBuffer();
+            ByteBuf byteBuf = ctx.channel().alloc().buffer();
             Channel channel = getChannel(ctx.channel().eventLoop());
             int requestId = count.getAndIncrement();
-            //保存通道,方便返回的时候直接取
+            //保存ctx,方便返回的时候直接取
             ChannelContextHolder.putChannelContext(requestId, ctx);
 
             byteBuf.writeInt(buf.readableBytes() + 4);
@@ -56,7 +55,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler {
     }
 
     public Channel getChannel(EventLoop loop) throws Exception {
-        //加权轮询负载均衡
+        //加权轮询负载均衡比例1比2比2
         if (null == endpoints) {
             synchronized (lock) {
                 if (null == endpoints) {
