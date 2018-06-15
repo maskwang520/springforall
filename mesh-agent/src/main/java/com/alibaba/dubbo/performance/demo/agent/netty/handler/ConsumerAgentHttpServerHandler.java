@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created this one by huminghao on 2018/6/9.
@@ -21,6 +22,8 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
     private static List<Endpoint> endpoints = null;
 
     private Channel outboundChannel;
+
+    private static AtomicInteger count = new AtomicInteger(0);
 
 
     private static final Logger logger = LoggerFactory.getLogger(ConsumerAgentHttpServerHandler.class);

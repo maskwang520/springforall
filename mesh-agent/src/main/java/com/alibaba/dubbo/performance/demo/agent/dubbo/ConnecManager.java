@@ -10,20 +10,14 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 
 public class ConnecManager {
     private EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
-
     private Bootstrap bootstrap;
-
-    private Channel channel;
     private Object lock = new Object();
 
     public ConnecManager() {
     }
 
     public Channel getChannel() throws Exception {
-        if (null != channel) {
-            return channel;
-        }
-
+        Channel channel = null;
         if (null == bootstrap) {
             synchronized (lock) {
                 if (null == bootstrap) {
@@ -40,7 +34,6 @@ public class ConnecManager {
                 }
             }
         }
-
         return channel;
     }
 
