@@ -6,12 +6,9 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -22,11 +19,8 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
     private static List<Endpoint> endpoints = null;
 
     private Channel outboundChannel;
-
+    private Object lock = new Object();
     private static AtomicInteger count = new AtomicInteger(0);
-
-
-    private static final Logger logger = LoggerFactory.getLogger(ConsumerAgentHttpServerHandler.class);
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -44,9 +38,15 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
                 }
             }
         }
-
+        int id = count.getAndIncrement();
+        if(id>=4){
+            count.set(0);
+            id=4;
+        }
+        System.out.println(id);
         // 简单的负载均衡，随机取一个
-        Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
+        Endpoint endpoint = endpoints.get(id);
+
         final Channel inboundChannel = ctx.channel();
         //
         // Start the connection attempt.
@@ -98,9 +98,6 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
             });
         }
     }
-
-    private Random random = new Random();
-    private Object lock = new Object();
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
