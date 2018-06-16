@@ -1,5 +1,8 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.handler;
 
+import com.alibaba.dubbo.performance.demo.agent.dubbo.ClientAgentConnectManager;
+import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.modle.RegistrySingleton;
+import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.util.ChannelContextHolder;
 import com.alibaba.dubbo.performance.demo.agent.util.ClientLoopMap;
 import io.netty.buffer.ByteBuf;
@@ -10,6 +13,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.util.ReferenceCountUtil;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -22,8 +26,11 @@ public class NettyServerHandler extends SimpleChannelInboundHandler {
     private static AtomicInteger count = new AtomicInteger(0);
     private static AtomicInteger counter = new AtomicInteger(0);
 
-    private static List<Integer> nums = Arrays.asList(0,1,1,2,2);
+    private static List<Integer> nums = Arrays.asList(0, 1, 1, 2, 2);
     private static ClientLoopMap map = new ClientLoopMap();
+
+    private static List<Endpoint> endpoints;
+    private ClientAgentConnectManager manager = new ClientAgentConnectManager();
 
 
     @Override
@@ -49,16 +56,27 @@ public class NettyServerHandler extends SimpleChannelInboundHandler {
         }
     }
 
-
-
+    //延迟到这里初始化
     public Channel getChannel(EventLoop loop) throws Exception {
-
         int id = counter.getAndIncrement();
         if (id >= 4) {
             counter.set(0);
             id = 4;
         }
+        if (!map.contains(loop)) {
+            endpoints = RegistrySingleton.getInstance().find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
+            ArrayList<Channel> arrayList = new ArrayList();
+            //可以改变个数
+            for (int i = 0; i < 3; i++) {
+                arrayList.add(manager.getChannel(endpoints.get(i).getHost(), endpoints.get(i).getPort(), loop));
+            }
+            map.put(loop, arrayList);
+            return arrayList.get(id);
+
+        }
+
         List<Channel> list = map.get(loop);
+
         return list.get(nums.get(id));
     }
 

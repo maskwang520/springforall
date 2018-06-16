@@ -34,7 +34,6 @@ public class ConsumerHttpServer {
     private ClientAgentConnectManager manager = new ClientAgentConnectManager();
 
     public void getConsumerChannle(int port) throws InterruptedException {
-        putMap();
         Channel channel = null;
         try {
             b.group(bossGroup, workerGroup);
@@ -59,35 +58,9 @@ public class ConsumerHttpServer {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
-
     }
 
 
-    /**
-     * 提前构造channel放到map中
-     */
-    public void putMap() {
-        try {
-            endpoints = RegistrySingleton.getInstance().find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
-            //排序
-            Collections.sort(endpoints, new Comparator<Endpoint>() {
-                @Override
-                public int compare(Endpoint o1, Endpoint o2) {
-                    return o1.getSize()>o2.getSize()?1:(o1.getSize()==o1.getSize()?0:-1);
-                }
-            });
 
-            for (EventExecutor executor : workerGroup) {
-                ArrayList<Channel> arrayList = new ArrayList();
-                //可以改变个数
-                for (int i = 0; i < 3; i++) {
-                    arrayList.add(manager.getChannel(endpoints.get(i).getHost(), endpoints.get(i).getPort(), (EventLoop) executor));
-                }
-                map.put((EventLoop) executor, arrayList);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
 }

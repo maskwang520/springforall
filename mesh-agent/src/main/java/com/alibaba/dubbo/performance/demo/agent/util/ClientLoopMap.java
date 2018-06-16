@@ -24,5 +24,9 @@ public class ClientLoopMap {
         return map.get(loop);
     }
 
+    public boolean contains(EventLoop loop){
+        return map.containsKey(loop);
+    }
+
 
 }
