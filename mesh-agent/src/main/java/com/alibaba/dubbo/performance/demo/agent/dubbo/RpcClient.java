@@ -15,19 +15,14 @@ import java.util.function.Consumer;
 public class RpcClient {
     private static final Logger logger = LoggerFactory.getLogger(RpcClient.class);
 
-    private ConnecManager connectManager = new ConnecManager();
+    private static EventLoopMap map = new EventLoopMap();
 
-    private EventLoopMap eventLoopMap = new EventLoopMap();
+
 
 
     public void invoke(String interfaceName, String method, String parameterTypesString, String parameter, Consumer<String> callback, EventLoop loop) throws Exception {
-        Channel channel = null;
-        if(eventLoopMap.contains(loop)) {
-            channel = eventLoopMap.get(loop);
-        }else{
-             channel = connectManager.getChannel();
-             eventLoopMap.put(loop,channel);
-        }
+        Channel channel = map.get(loop);
+
         RpcInvocation invocation = new RpcInvocation();
         invocation.setMethodName(method);
         invocation.setAttachment("path", interfaceName);

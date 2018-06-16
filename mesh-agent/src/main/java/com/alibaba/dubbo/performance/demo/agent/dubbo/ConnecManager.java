@@ -5,16 +5,17 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
 public class ConnecManager {
-    private static EventLoopGroup eventLoopGroup = new NioEventLoopGroup(4);
-    private static Bootstrap bootstrap;
+    private EventLoopGroup eventLoopGroup ;
+    private Bootstrap bootstrap;
 
 
-    public Channel getChannel() throws Exception {
+    public Channel getChannel(EventLoopGroup group) throws Exception {
+        this.eventLoopGroup = group;
         Channel channel = null;
+        bootstrap = null;
         if (null == bootstrap) {
             synchronized (ConnecManager.class) {
                 if (null == bootstrap) {
@@ -24,8 +25,8 @@ public class ConnecManager {
         }
 
         if (null == channel) {
-            synchronized (ConnecManager.class){
-                if (null == channel){
+            synchronized (ConnecManager.class) {
+                if (null == channel) {
                     int port = Integer.valueOf(System.getProperty("dubbo.protocol.port"));
                     channel = bootstrap.connect("127.0.0.1", port).sync().channel();
                 }
