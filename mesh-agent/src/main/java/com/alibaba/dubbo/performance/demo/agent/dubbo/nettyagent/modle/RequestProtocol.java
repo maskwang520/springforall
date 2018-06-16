@@ -10,8 +10,17 @@ public class RequestProtocol implements Serializable {
 
     int requestId;
 
-    byte[] content;
+    int interfaceLen;
+    String interfaceName;
 
+    int methodLen;
+    String methodName;
+
+    int parameterTypeLen;
+    String parameterType;
+
+    int paraLen;
+    String param;
 
     public int getRequestId() {
         return requestId;
@@ -21,11 +30,35 @@ public class RequestProtocol implements Serializable {
         this.requestId = requestId;
     }
 
-    public byte[] getContent() {
-        return content;
+    public String getInterfaceName() {
+        return interfaceName;
     }
 
-    public void setContent(byte[] content) {
-        this.content = content;
+    public void setInterfaceName(String interfaceName) {
+        this.interfaceName = interfaceName;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
+
+    public String getParameterType() {
+        return parameterType;
+    }
+
+    public void setParameterType(String parameterType) {
+        this.parameterType = parameterType;
+    }
+
+    public String getParam() {
+        return param;
+    }
+
+    public void setParam(String param) {
+        this.param = param;
     }
 }

@@ -1,6 +1,7 @@
 package com.alibaba.dubbo.performance.demo.agent;
 
 import com.alibaba.dubbo.performance.demo.agent.dubbo.nettyagent.modle.RegistrySingleton;
+import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,15 +17,14 @@ public class AgentApp {
     public static void main(String[] args) throws Exception {
 
         String type = System.getProperty("type");
-        IRegistry registry = RegistrySingleton.getInstance();
         if ("provider".equals(type)) {
             LOGGER.info("start provider");
+            EtcdRegistry registry = RegistrySingleton.getInstance();
             new ServerConnector().connect(19980);
         } else {
             new ConsumerHttpServer().getConsumerChannle(20000);
 
         }
-
 
     }
 }

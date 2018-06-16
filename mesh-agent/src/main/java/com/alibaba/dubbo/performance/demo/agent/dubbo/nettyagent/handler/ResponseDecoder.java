@@ -14,7 +14,6 @@ import java.util.List;
 public class ResponseDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
-
         if(byteBuf.readableBytes()<4) {
             return;
         }
@@ -32,6 +31,7 @@ public class ResponseDecoder extends ByteToMessageDecoder {
         agentRpcResponse.setBytes(temp);
         list.add(agentRpcResponse);
 
+        byteBuf.release();
 
 
     }

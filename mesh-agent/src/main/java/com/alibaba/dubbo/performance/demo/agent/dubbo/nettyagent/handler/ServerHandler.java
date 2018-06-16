@@ -15,7 +15,7 @@ import java.util.Map;
  * Created by maskwang on 18-6-3.
  * provider-agent的逻辑处理
  */
-public class ServerHandler extends SimpleChannelInboundHandler {
+public class ServerHandler extends SimpleChannelInboundHandler<RequestProtocol> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerHandler.class);
 
@@ -23,17 +23,20 @@ public class ServerHandler extends SimpleChannelInboundHandler {
 
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        RequestProtocol requestProtocol = (RequestProtocol) msg;
-        //获取参数
-        QueryStringDecoder queryStringDecoder = new QueryStringDecoder("?"+new String(requestProtocol.getContent()));
-        Map<String,List<String>> map = queryStringDecoder.parameters();
+    protected void channelRead0(ChannelHandlerContext ctx, RequestProtocol requestProtocol) throws Exception {
+        System.out.println("wocaonima");
         //调用dubbo client
-        rpcClient.invoke(map.get("interface").get(0), map.get("method").get(0), map.get("parameterTypesString").get(0), map.get("parameter").get(0),requestProtocol.getRequestId(),
+        rpcClient.invoke(requestProtocol.getInterfaceName(), requestProtocol.getMethodName(), requestProtocol.getParameterType(), requestProtocol.getParam(),requestProtocol.getRequestId(),
                 (result)->{
                     ctx.writeAndFlush(result);
                 }
-        ,ctx.channel().eventLoop());
+       ,ctx.channel().eventLoop());
 
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("active");
+        super.channelActive(ctx);
     }
 }

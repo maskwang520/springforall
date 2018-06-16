@@ -5,14 +5,9 @@ import io.netty.channel.EventLoop;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Created by maskwang on 18-6-15.
- *
- * 存放EventLoop和channel的对应关系
- */
-public class EventLoopMap {
+public class ServerLoopMap {
 
-    static ConcurrentHashMap<EventLoop,Channel> map = new ConcurrentHashMap();
+    private static ConcurrentHashMap<EventLoop,Channel> map = new ConcurrentHashMap<EventLoop, Channel>();
 
     public void put(EventLoop loop,Channel channel){
         map.put(loop,channel);
@@ -21,9 +16,4 @@ public class EventLoopMap {
     public Channel get(EventLoop loop){
         return map.get(loop);
     }
-
-    public boolean contains(EventLoop loop){
-        return map.containsKey(loop);
-    }
-
 }

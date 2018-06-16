@@ -14,8 +14,8 @@ public class RequestDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
+        System.out.println("dasab");
         RequestProtocol requestProtocol = new RequestProtocol();
-
         if (byteBuf.readableBytes() < 4) {
             return;
         }
@@ -28,11 +28,30 @@ public class RequestDecoder extends ByteToMessageDecoder {
         }
 
         int requestId = byteBuf.readInt();
-        byte[] temp = new byte[len - 4];
-        byteBuf.readBytes(temp);
         requestProtocol.setRequestId(requestId);
-        requestProtocol.setContent(temp);
+
+        int lena = byteBuf.readInt();
+        byte[] temp = new byte[lena];
+        byteBuf.readBytes(temp);
+        requestProtocol.setInterfaceName(new String(temp));
+
+        int lenb = byteBuf.readInt();
+        temp = new byte[lenb];
+        byteBuf.readBytes(temp);
+        requestProtocol.setMethodName(new String(temp));
+
+        int lenc = byteBuf.readInt();
+        temp = new byte[lenc];
+        byteBuf.readBytes(temp);
+        requestProtocol.setParameterType(new String(temp));
+
+        int lend = byteBuf.readInt();
+        temp = new byte[lend];
+        byteBuf.readBytes(temp);
+        requestProtocol.setParam(new String(temp));
         list.add(requestProtocol);
+
+       // byteBuf.release();
 
     }
 }
