@@ -1,7 +1,7 @@
 package com.alibaba.dubbo.performance.demo.agent.dubbo;
 
 import com.alibaba.dubbo.performance.demo.agent.dubbo.model.*;
-import com.alibaba.dubbo.performance.demo.agent.util.EventLoopMap;
+import com.alibaba.dubbo.performance.demo.agent.util.ServerLoopMap;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoop;
 import org.slf4j.Logger;
@@ -17,18 +17,13 @@ public class RpcClient {
     private final static Logger LOGGER = LoggerFactory.getLogger(RpcClient.class);
 
     private ConnecManager connectManager = new ConnecManager();
-    private EventLoopMap eventLoopMap = new EventLoopMap();
+    private ServerLoopMap eventLoopMap = new ServerLoopMap();
+    private ServerLoopMap map = new ServerLoopMap();
 
 
     public void invoke(String interfaceName, String method, String parameterTypesString, String parameter,int requestId,Consumer callback,EventLoop loop) throws Exception {
 
-        Channel channel = null;
-        if(eventLoopMap.contains(loop)) {
-            channel = eventLoopMap.get(loop);
-        }else{
-            channel = connectManager.getChannel("127.0.0.1",Integer.valueOf(System.getProperty("dubbo.protocol.port")));
-            eventLoopMap.put(loop,channel);
-        }
+        Channel channel = map.get(loop);
 
         RpcInvocation invocation = new RpcInvocation();
         invocation.setMethodName(method);

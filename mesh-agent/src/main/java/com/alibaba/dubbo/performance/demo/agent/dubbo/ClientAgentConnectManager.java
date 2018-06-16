@@ -8,7 +8,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
 /**
@@ -17,15 +16,18 @@ import io.netty.channel.socket.nio.NioSocketChannel;
  * 构造clientAgent连接providentAgent的channel
  */
 public class ClientAgentConnectManager {
-    private static EventLoopGroup eventLoopGroup = new NioEventLoopGroup(4);
-    private static Bootstrap bootstrap;
+
+    private  EventLoopGroup eventLoopGroup;
+    private  Bootstrap bootstrap;
 
 
     public ClientAgentConnectManager() {
     }
 
-    public Channel getChannel(String host, int port) throws Exception {
+    public Channel getChannel(String host, int port,EventLoopGroup loop) throws Exception {
+        this.eventLoopGroup = loop;
         Channel channel = null;
+        bootstrap = null;
         if (null == bootstrap) {
             synchronized (ClientAgentConnectManager.class) {
                 if (null == bootstrap) {
@@ -37,7 +39,7 @@ public class ClientAgentConnectManager {
         if (null == channel) {
             synchronized (ClientAgentConnectManager.class) {
                 if (null == channel) {
-                    channel = bootstrap.connect(host, port).sync().channel();
+                    channel = bootstrap.connect(host, port).channel();
                 }
             }
         }

@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * 存放EventLoop和channel的对应关系
  */
-public class EventLoopMap {
+public class ServerLoopMap {
 
     static ConcurrentHashMap<EventLoop,Channel> map = new ConcurrentHashMap();
 
@@ -22,8 +22,5 @@ public class EventLoopMap {
         return map.get(loop);
     }
 
-    public boolean contains(EventLoop loop){
-        return map.containsKey(loop);
-    }
 
 }

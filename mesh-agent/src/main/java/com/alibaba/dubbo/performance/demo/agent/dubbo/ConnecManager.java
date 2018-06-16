@@ -5,7 +5,6 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
 /**
@@ -14,15 +13,14 @@ import io.netty.channel.socket.nio.NioSocketChannel;
  */
 
 public class ConnecManager {
-    private static EventLoopGroup eventLoopGroup = new NioEventLoopGroup(4);
-    private static Bootstrap bootstrap;
+    private  EventLoopGroup eventLoopGroup ;
+    private  Bootstrap bootstrap;
 
 
-    public ConnecManager() {
-    }
-
-    public Channel getChannel(String host, int port) throws Exception {
+    public Channel getChannel(String host, int port,EventLoopGroup loop) throws Exception {
+        this.eventLoopGroup = loop;
         Channel channel = null;
+        bootstrap = null;
         if (null == bootstrap) {
             synchronized (ConnecManager.class) {
                 if (null == bootstrap) {
@@ -34,7 +32,7 @@ public class ConnecManager {
         if (null == channel) {
             synchronized (ConnecManager.class) {
                 if (null == channel) {
-                    channel = bootstrap.connect(host, port).sync().channel();
+                    channel = bootstrap.connect(host, port).channel();
                 }
             }
         }
@@ -42,7 +40,6 @@ public class ConnecManager {
     }
 
     public void initBootstrap() {
-
         bootstrap = new Bootstrap()
                 .group(eventLoopGroup)
                 .option(ChannelOption.SO_KEEPALIVE, true)
