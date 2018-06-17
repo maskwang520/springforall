@@ -33,6 +33,9 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
                         Endpoint temp = it.next();
                         if(temp.getSize()==2) {
                             it.add(temp);
+                            it.add(temp);
+                            it.add(temp);
+                            it.add(temp);
                         }
                     }
                 }
@@ -67,9 +70,6 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
             if (future.isSuccess()) {
                 // connection complete start to read first data
                 inboundChannel.read();
-            } else {
-                // Close the connection if the connection attempt has failed.
-                //inboundChannel.close();
             }
         });
     }
@@ -80,8 +80,6 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
     static void closeOnFlush(Channel ch) {
         if (ch.isActive()) {
             ch.writeAndFlush(Unpooled.EMPTY_BUFFER);
-        }else{
-            //ch.close();
         }
     }
 

@@ -4,8 +4,6 @@ import com.alibaba.dubbo.performance.demo.agent.dubbo.model.*;
 import com.alibaba.dubbo.performance.demo.agent.util.EventLoopMap;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoop;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
@@ -13,11 +11,8 @@ import java.io.PrintWriter;
 import java.util.function.Consumer;
 
 public class RpcClient {
-    private static final Logger logger = LoggerFactory.getLogger(RpcClient.class);
 
     private static EventLoopMap map = new EventLoopMap();
-
-
 
 
     public void invoke(String interfaceName, String method, String parameterTypesString, String parameter, Consumer<String> callback, EventLoop loop) throws Exception {
@@ -37,8 +32,6 @@ public class RpcClient {
         request.setVersion("2.0.0");
         request.setTwoWay(true);
         request.setData(invocation);
-
-        logger.info("requestId=" + request.getId());
 
         RpcFuture future = new RpcFuture(callback);
         RpcRequestHolder.put(String.valueOf(request.getId()),future);
