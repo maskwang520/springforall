@@ -1,13 +1,11 @@
 package com.alibaba.dubbo.performance.demo.agent.netty.handler;
 
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.*;
 
+@ChannelHandler.Sharable
 public class ConsumerAgentHttpClientHandler extends ChannelInboundHandlerAdapter {
 
-    private final Channel inboundChannel;
+    private  Channel inboundChannel;
 
     public ConsumerAgentHttpClientHandler(Channel inboundChannel) {
         this.inboundChannel = inboundChannel;

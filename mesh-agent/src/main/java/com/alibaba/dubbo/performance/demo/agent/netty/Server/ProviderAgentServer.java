@@ -4,6 +4,7 @@ import com.alibaba.dubbo.performance.demo.agent.dubbo.RpcClient;
 import com.alibaba.dubbo.performance.demo.agent.netty.model.HttpParser;
 import com.alibaba.dubbo.performance.demo.agent.netty.model.RequestWrapper;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.EventLoop;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -19,6 +20,7 @@ import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
+@ChannelHandler.Sharable
 public class ProviderAgentServer extends SimpleChannelInboundHandler<FullHttpRequest> {
     private RpcClient rpcClient = new RpcClient();
     @Override

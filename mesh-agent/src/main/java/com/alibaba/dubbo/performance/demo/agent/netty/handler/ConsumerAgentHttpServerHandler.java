@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created this one by huminghao on 2018/6/9.
  */
+@ChannelHandler.Sharable
 public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter {
 
     private static List<Endpoint> endpoints = null;
@@ -32,9 +33,6 @@ public class ConsumerAgentHttpServerHandler extends ChannelInboundHandlerAdapter
                     while (it.hasNext()){
                         Endpoint temp = it.next();
                         if(temp.getSize()==2) {
-                            it.add(temp);
-                            it.add(temp);
-                            it.add(temp);
                             it.add(temp);
                         }
                     }
