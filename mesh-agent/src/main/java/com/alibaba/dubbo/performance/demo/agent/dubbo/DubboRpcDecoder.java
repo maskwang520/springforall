@@ -3,14 +3,12 @@ package com.alibaba.dubbo.performance.demo.agent.dubbo;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.model.Bytes;
 import com.alibaba.dubbo.performance.demo.agent.dubbo.model.RpcResponse;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
 import java.util.Arrays;
 import java.util.List;
 
-@ChannelHandler.Sharable
 public class DubboRpcDecoder extends ByteToMessageDecoder {
     // header length.
     protected static final int HEADER_LENGTH = 16;
